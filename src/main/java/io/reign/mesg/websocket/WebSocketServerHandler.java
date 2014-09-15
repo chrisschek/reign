@@ -491,6 +491,8 @@ public class WebSocketServerHandler extends ExecutionHandler {
 			// separate threadpool
 			final ChannelHandlerContext finalCtx = ctx;
 			final WebSocketFrame finalFrame = frame;
+			logger.debug("GOT BINARY:  isFinalFragment={}; rsv={}; binaryData={}", finalFrame.isFinalFragment(),
+			        finalFrame.getRsv(), finalFrame.getBinaryData());
 			this.getExecutor().execute(new Runnable() {
 				@Override
 				public void run() {
