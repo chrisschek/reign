@@ -151,7 +151,7 @@ public class DefaultMessagingService extends AbstractService implements Messagin
 
 		String nodeId = selectNode(serviceInfo.getNodeIdList());
 
-		NodeAddress nodeInfo = new StaticNodeInfo(clusterId, serviceId, nodeId, null);
+		NodeAddress nodeInfo = new StaticNodeInfo(nodeId);
 		ResponseMessage responseMessage = sendMessage(clusterId, serviceId, nodeInfo, requestMessage);
 		return responseMessage;
 	}
@@ -247,7 +247,7 @@ public class DefaultMessagingService extends AbstractService implements Messagin
 
 		String nodeId = selectNode(serviceInfo.getNodeIdList());
 
-		NodeAddress nodeInfo = new StaticNodeInfo(clusterId, serviceId, nodeId, null);
+		NodeAddress nodeInfo = new StaticNodeInfo(nodeId);
 		sendMessageAsync(clusterId, serviceId, nodeInfo, requestMessage, callback);
 	}
 
@@ -320,7 +320,7 @@ public class DefaultMessagingService extends AbstractService implements Messagin
 		}
 
 		String nodeId = selectNode(serviceInfo.getNodeIdList());
-		NodeAddress nodeInfo = new StaticNodeInfo(clusterId, serviceId, nodeId, null);
+		NodeAddress nodeInfo = new StaticNodeInfo(nodeId);
 		sendMessageFF(clusterId, serviceId, nodeInfo, requestMessage);
 	}
 
