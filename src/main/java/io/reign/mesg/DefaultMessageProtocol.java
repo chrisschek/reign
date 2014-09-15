@@ -36,6 +36,7 @@ public class DefaultMessageProtocol implements MessageProtocol {
 		protected Kryo initialValue() {
 			Kryo kryo = new Kryo();
 			kryo.register(SimpleRequestMessage.class);
+			kryo.register(SimpleResponseMessage.class);
 			return kryo;
 		}
 
