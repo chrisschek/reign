@@ -43,14 +43,6 @@ public class MessagingServiceExample {
 		        .get();
 		reign.start();
 
-		/** init and start using Spring convenience builder **/
-		// SpringReignMaker springReignMaker = new SpringReignMaker();
-		// springReignMaker.setZkConnectString("localhost:2181");
-		// springReignMaker.setZkSessionTimeout(30000);
-		// springReignMaker.setCore(true);
-		// springReignMaker.initializeAndStart();
-		// Reign reign = springReignMaker.get();
-
 		/** messaging example **/
 		messagingExample(reign);
 
@@ -90,9 +82,9 @@ public class MessagingServiceExample {
 
 		logger.info("Broadcast#3:  responseMap={}", responseMap);
 
-		responseMap = messagingService.sendMessage("examples", "service1",
+		ResponseMessage response = messagingService.sendMessageSingleNode("examples", "service1",
 		        new SimpleRequestMessage("null", "/examples".getBytes()));
 
-		logger.info("BINARY Broadcast#1:  responseMap={}", responseMap);
+		logger.info("BINARY Broadcast#1:  response={}", response);
 	}
 }
