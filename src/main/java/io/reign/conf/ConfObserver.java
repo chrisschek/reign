@@ -45,23 +45,23 @@ public abstract class ConfObserver<T> extends AbstractObserver {
 
     @Override
     public void nodeDataChanged(byte[] updatedData, byte[] previousData) {
-        updated(toConf(updatedData), toConf(previousData));
+        updated(fromBytes(updatedData), fromBytes(previousData));
     }
 
     @Override
     public void nodeDeleted(byte[] previousData, List<String> previousChildList) {
-        updated(null, toConf(previousData));
+        updated(null, fromBytes(previousData));
     }
 
     @Override
     public void nodeCreated(byte[] data, List<String> childList) {
-        T conf = toConf(data);
+        T conf = fromBytes(data);
         if (conf != null) {
             updated(conf, null);
         }
     }
 
-    T toConf(byte[] data) {
+    public T fromBytes(byte[] data) {
         if (data == null || data.length == 0) {
             return null;
         }
