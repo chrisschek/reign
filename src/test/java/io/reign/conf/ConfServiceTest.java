@@ -13,7 +13,6 @@
 
 package io.reign.conf;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import io.reign.MasterTestSuite;
 
@@ -87,42 +86,4 @@ public class ConfServiceTest {
         assertTrue(testPassed.get());
     }
 
-    @Test
-    public void testIsValidConfPath() {
-        assertTrue(ConfService.isValidConfPath("this.properties"));
-        assertTrue(ConfService.isValidConfPath("/conf/what/super/a.json"));
-        assertTrue(ConfService.isValidConfPath("/conf/what/super/a.0.1.x.json"));
-        assertTrue(ConfService.isValidConfPath("/conf/what/this.properties"));
-        assertTrue(ConfService.isValidConfPath("/conf/what/super/this.properties"));
-
-        assertFalse(ConfService.isValidConfPath("."));
-        assertFalse(ConfService.isValidConfPath("/."));
-        assertFalse(ConfService.isValidConfPath("a."));
-        assertFalse(ConfService.isValidConfPath(".properties"));
-        assertFalse(ConfService.isValidConfPath("/.properties"));
-        assertFalse(ConfService.isValidConfPath("/conf/what/super/this.properties/"));
-    }
-
-    @Test
-    public void testCastValueIfNecessary() {
-        Object value;
-
-        value = ConfService.castValueIfNecessary("(int)999");
-        assertTrue(value.equals(999) && value instanceof Integer);
-
-        value = ConfService.castValueIfNecessary("(long)9999999999");
-        assertTrue(value.equals(9999999999L) && value instanceof Long);
-
-        value = ConfService.castValueIfNecessary("(double)9.99");
-        assertTrue(value.equals(9.99) && value instanceof Double);
-
-        value = ConfService.castValueIfNecessary("(float)99.9");
-        assertTrue(value.equals(99.9F) && value instanceof Float);
-
-        value = ConfService.castValueIfNecessary("(short)9");
-        assertTrue(value.equals((short) 9) && value instanceof Short);
-
-        value = ConfService.castValueIfNecessary("(byte)1");
-        assertTrue(value.equals((byte) 1) && value instanceof Byte);
-    }
 }
