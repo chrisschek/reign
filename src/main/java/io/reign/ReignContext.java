@@ -16,10 +16,11 @@
 
 package io.reign;
 
-import io.reign.lease.LeaseService;
-import io.reign.mesg.MessagingService;
-import io.reign.metrics.MetricsService;
-import io.reign.presence.PresenceService;
+import io.reign.conf.ConfServiceRequestBuilder;
+import io.reign.lease.LeaseServiceRequestBuilder;
+import io.reign.mesg.MessagingServiceRequestBuilder;
+import io.reign.metrics.MetricsServiceRequestBuilder;
+import io.reign.presence.PresenceServiceRequestBuilder;
 
 import java.util.List;
 
@@ -45,12 +46,14 @@ public interface ReignContext {
 
     public ObserverManager getObserverManager();
 
-    public PresenceService presence();
+    public PresenceServiceRequestBuilder presence();
 
-    public MessagingService mesg();
+    public MessagingServiceRequestBuilder mesg();
 
-    public MetricsService metrics();
+    public MetricsServiceRequestBuilder metrics();
 
-    public LeaseService lease();
+    public LeaseServiceRequestBuilder lease();
+
+    public ConfServiceRequestBuilder conf();
 
 }

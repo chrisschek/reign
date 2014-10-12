@@ -13,10 +13,16 @@
 
 package io.reign;
 
+import io.reign.conf.ConfService;
+import io.reign.conf.ConfServiceRequestBuilder;
 import io.reign.lease.LeaseService;
+import io.reign.lease.LeaseServiceRequestBuilder;
 import io.reign.mesg.MessagingService;
+import io.reign.mesg.MessagingServiceRequestBuilder;
 import io.reign.metrics.MetricsService;
+import io.reign.metrics.MetricsServiceRequestBuilder;
 import io.reign.presence.PresenceService;
+import io.reign.presence.PresenceServiceRequestBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -229,20 +235,24 @@ public class Reign implements Watcher {
 
     }
 
-    public PresenceService presence() {
-        return (PresenceService) getService("presence");
+    public PresenceServiceRequestBuilder presence() {
+        return context().presence();
     }
 
-    public MessagingService mesg() {
-        return (MessagingService) getService("mesg");
+    public MessagingServiceRequestBuilder mesg() {
+        return context().mesg();
     }
 
-    public MetricsService metrics() {
-        return (MetricsService) getService("metrics");
+    public MetricsServiceRequestBuilder metrics() {
+        return context().metrics();
     }
 
-    public LeaseService lease() {
-        return (LeaseService) getService("lease");
+    public LeaseServiceRequestBuilder lease() {
+        return context().lease();
+    }
+
+    public ConfServiceRequestBuilder conf() {
+        return context().conf();
     }
 
     public ReignContext context() {
@@ -322,23 +332,28 @@ public class Reign implements Watcher {
             }
 
             @Override
-            public PresenceService presence() {
-                return (PresenceService) getService("presence");
+            public PresenceServiceRequestBuilder presence() {
+                return new PresenceServiceRequestBuilder((PresenceService) getService("presence"));
             }
 
             @Override
-            public MessagingService mesg() {
-                return (MessagingService) getService("mesg");
+            public MessagingServiceRequestBuilder mesg() {
+                return new MessagingServiceRequestBuilder((MessagingService) getService("mesg"));
             }
 
             @Override
-            public MetricsService metrics() {
-                return (MetricsService) getService("metrics");
+            public MetricsServiceRequestBuilder metrics() {
+                return new MetricsServiceRequestBuilder((MetricsService) getService("metrics"));
             }
 
             @Override
-            public LeaseService lease() {
-                return (LeaseService) getService("lease");
+            public LeaseServiceRequestBuilder lease() {
+                return new LeaseServiceRequestBuilder((LeaseService) getService("lease"));
+            }
+
+            @Override
+            public ConfServiceRequestBuilder conf() {
+                return new ConfServiceRequestBuilder((ConfService) getService("conf"));
             }
 
         };

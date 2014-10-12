@@ -18,6 +18,8 @@ package io.reign.lease;
 
 import io.reign.Service;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * 
  * @author ypai
@@ -25,6 +27,10 @@ import io.reign.Service;
  */
 public interface LeaseService extends Service {
 
-    public void get(String clusterId, String leaseId, LeaseEventHandler leaseHandler);
+	public void request(String clusterId, String leaseId, int poolSize, long leaseDuration, TimeUnit leaseDurationUnit,
+	        LeaseObserver leaseObserver);
+
+	public void observe(String clusterId, String leaseId, int poolSize, long leaseDuration, TimeUnit leaseDurationUnit,
+	        LeaseObserver leaseObserver);
 
 }

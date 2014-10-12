@@ -21,13 +21,13 @@ public class UpdatingNodeInfoTest {
 
 	@Test
 	public void testBasic() throws Exception {
-		UpdatingNodeInfo nodeInfo = null;
+		UpdatingServiceNodeInfo nodeInfo = null;
 		try {
 			ReignContext context = MasterTestSuite.getReign().getContext();
 			PathScheme pathScheme = context.getPathScheme();
 
 			// create self-updating Conf object, should be empty initially
-			nodeInfo = new UpdatingNodeInfo("clusterABC", "serviceABC", context.getNodeId(), context);
+			nodeInfo = new UpdatingServiceNodeInfo("clusterABC", "serviceABC", context.getNodeId(), context);
 			assertTrue("clusterABC".equals(nodeInfo.getClusterId()));
 			assertTrue("serviceABC".equals(nodeInfo.getServiceId()));
 			assertTrue(context.getNodeId().equals(nodeInfo.getNodeId()));
@@ -56,7 +56,7 @@ public class UpdatingNodeInfoTest {
 
 	@Test
 	public void testDestroy() throws Exception {
-		UpdatingNodeInfo nodeInfo = null;
+		UpdatingServiceNodeInfo nodeInfo = null;
 
 		ReignContext context = MasterTestSuite.getReign().getContext();
 		ObserverManager observerManager = context.getObserverManager();
@@ -64,7 +64,7 @@ public class UpdatingNodeInfoTest {
 		        context.getNodeId().toString());
 
 		// create self-updating Conf object, observer should be registered
-		nodeInfo = new UpdatingNodeInfo("clusterA", "serviceB", context.getNodeId(), context);
+		nodeInfo = new UpdatingServiceNodeInfo("clusterA", "serviceB", context.getNodeId(), context);
 		assertTrue(observerManager.getReadOnlyObserverSet(path).size() == 1);
 
 		// destroy object, observer should be removed

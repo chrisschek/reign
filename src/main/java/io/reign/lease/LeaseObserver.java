@@ -20,12 +20,14 @@ package io.reign.lease;
  * @author ypai
  * 
  */
-public interface LeaseEventHandler {
+public interface LeaseObserver {
 
-    public void acquired(Lease lease);
+	public void acquired(Lease lease);
 
-    public void renewed(Lease lease);
+	public void renewed(Lease lease);
 
-    public void relinquished(Lease lease);
+	public void relinquished(Lease lease);
+
+	public void revoked(Lease lease);
 
 }

@@ -27,7 +27,7 @@ import java.util.Map;
  * @author ypai
  * 
  */
-public class UpdatingNodeInfo implements ServiceNodeInfo {
+public class UpdatingServiceNodeInfo implements ServiceNodeInfo {
 
 	private volatile ServiceNodeInfo nodeInfo;
 	private final String clusterId;
@@ -36,7 +36,7 @@ public class UpdatingNodeInfo implements ServiceNodeInfo {
 	private final ReignContext context;
 	private final PresenceObserver<ServiceNodeInfo> observer;
 
-	public UpdatingNodeInfo(String clusterId, String serviceId, String nodeId, ReignContext context) {
+	public UpdatingServiceNodeInfo(String clusterId, String serviceId, String nodeId, ReignContext context) {
 		if (clusterId == null && serviceId == null && nodeId == null) {
 			throw new IllegalArgumentException("clusterId, serviceId, nodeId cannot be null!");
 		}
