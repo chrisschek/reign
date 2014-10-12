@@ -76,6 +76,7 @@ public abstract class AbstractService implements Service {
         this.context = serviceDirectory;
     }
 
+    @Override
     public PathScheme getPathScheme() {
         return pathScheme;
     }

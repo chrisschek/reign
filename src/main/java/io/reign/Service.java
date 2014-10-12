@@ -53,6 +53,8 @@ public interface Service {
      */
     public void setPathScheme(PathScheme pathScheme);
 
+    public PathScheme getPathScheme();
+
     /**
      * 
      * @param zkClient
