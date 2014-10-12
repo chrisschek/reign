@@ -18,6 +18,7 @@ package io.reign.coord;
 
 import io.reign.DataSerializer;
 import io.reign.JsonDataSerializer;
+import io.reign.Reign;
 import io.reign.conf.ConfObserver;
 import io.reign.conf.ConfService;
 
@@ -112,7 +113,7 @@ public class ConfiguredPermitPoolSize extends ConfObserver<Map<String, String>> 
      */
     public static void setSemaphoreConf(ConfService confService, String clusterId, String semaphoreName,
             int permitPoolSize) {
-        setSemaphoreConf(confService, clusterId, semaphoreName, permitPoolSize, confService.getDefaultZkAclList());
+        setSemaphoreConf(confService, clusterId, semaphoreName, permitPoolSize, Reign.DEFAULT_ACL_LIST);
     }
 
     public static void setSemaphoreConf(ConfService confService, String clusterId, String semaphoreName,
