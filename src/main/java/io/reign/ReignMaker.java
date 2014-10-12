@@ -14,6 +14,7 @@
 package io.reign;
 
 import io.reign.conf.ConfService;
+import io.reign.conf.DefaultConfService;
 import io.reign.coord.CoordinationService;
 import io.reign.data.DataService;
 import io.reign.mesg.DefaultMessagingService;
@@ -148,7 +149,7 @@ public class ReignMaker {
     }
 
     private ReignMaker conf() {
-        ConfService confService = new ConfService();
+        ConfService confService = new DefaultConfService();
         serviceMap.put("conf", confService);
 
         // alternate route for more concise messaging
