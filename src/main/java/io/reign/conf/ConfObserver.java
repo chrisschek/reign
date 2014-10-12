@@ -65,7 +65,7 @@ public abstract class ConfObserver<T> extends AbstractObserver {
         if (data == null || data.length == 0) {
             return null;
         }
-        DataSerializer<T> transcoder = ConfService.DEFAULT_CONF_SERIALIZER;
+        DataSerializer<T> transcoder = DefaultConfService.DEFAULT_CONF_SERIALIZER;
         return transcoder.deserialize(data);
     }
 
