@@ -1,5 +1,6 @@
 package io.reign.lease;
 
+import io.reign.AbstractService;
 import io.reign.ObserverManager;
 import io.reign.PathScheme;
 import io.reign.ReignContext;
@@ -12,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.zookeeper.data.ACL;
 
-public class DefaultLeaseService implements LeaseService {
+public class DefaultLeaseService extends AbstractService implements LeaseService {
 
     @Override
     public ReignContext getContext() {
