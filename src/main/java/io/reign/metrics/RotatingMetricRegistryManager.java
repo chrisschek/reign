@@ -45,17 +45,17 @@ public class RotatingMetricRegistryManager implements MetricRegistryManager {
     private final MetricRegistry metricRegistry;
     private volatile long lastRotatedTimestamp = -1L;
 
-    private final int rotationInterval;
+    private final long rotationInterval;
     private final TimeUnit rotationTimeUnit;
     private final long rotationIntervalMillis;
     private List<MetricRegistryManagerCallback> callbackList = Collections.EMPTY_LIST;
 
-    public RotatingMetricRegistryManager(int rotationInterval, TimeUnit rotationTimeUnit) {
+    public RotatingMetricRegistryManager(long rotationInterval, TimeUnit rotationTimeUnit) {
         this(new MetricRegistry(), rotationInterval, rotationTimeUnit);
 
     }
 
-    public RotatingMetricRegistryManager(MetricRegistry metricRegistry, int rotationInterval, TimeUnit rotationTimeUnit) {
+    public RotatingMetricRegistryManager(MetricRegistry metricRegistry, long rotationInterval, TimeUnit rotationTimeUnit) {
         this.rotationInterval = rotationInterval;
         this.rotationTimeUnit = rotationTimeUnit;
         rotationIntervalMillis = rotationTimeUnit.toMillis(rotationInterval);
@@ -144,7 +144,7 @@ public class RotatingMetricRegistryManager implements MetricRegistryManager {
     }
 
     @Override
-    public int getRotationInterval() {
+    public long getRotationInterval() {
         return this.rotationInterval;
     }
 
