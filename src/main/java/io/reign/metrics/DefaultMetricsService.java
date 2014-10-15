@@ -117,9 +117,9 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
      */
     @Override
     public void scheduleExport(final String clusterId, final String serviceId,
-            final MetricRegistryManager registryManager, long updateInterval, TimeUnit updateIntervalTimeUnit) {
-        scheduleExport(clusterId, serviceId, getContext().getNodeId(), registryManager, updateInterval,
-                updateIntervalTimeUnit);
+            final MetricRegistryManager registryManager, long persistInterval, TimeUnit persistIntervalTimeUnit) {
+        scheduleExport(clusterId, serviceId, getContext().getNodeId(), registryManager, persistInterval,
+                persistIntervalTimeUnit);
     }
 
     String exportPathMapKey(String clusterId, String serviceId, String nodeId) {
@@ -228,7 +228,7 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
      * Get metrics data for this service node (self) for current interval.
      */
     @Override
-    public MetricsData getMyMetrics(String clusterId, String serviceId) {
+    public MetricsData getNodeMetrics(String clusterId, String serviceId) {
         String key = clusterId + "/" + serviceId + "/" + getContext().getNodeId();
         ExportMeta exportMeta = exportPathMap.get(key);
         if (exportMeta == null) {
