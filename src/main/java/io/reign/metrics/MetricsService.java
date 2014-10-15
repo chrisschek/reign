@@ -32,7 +32,7 @@ public interface MetricsService extends Service {
      * Registers metrics for export to ZK.
      */
     public void scheduleExport(final String clusterId, final String serviceId,
-            final MetricRegistryManager registryManager, long updateInterval, TimeUnit updateIntervalTimeUnit);
+            final MetricRegistryManager registryManager, long persistInterval, TimeUnit persistIntervalTimeUnit);
 
     /**
      * Get metrics data for given service.
@@ -42,7 +42,7 @@ public interface MetricsService extends Service {
     /**
      * Get metrics data for this service node (self) for current interval.
      */
-    public MetricsData getMyMetrics(String clusterId, String serviceId);
+    public MetricsData getNodeMetrics(String clusterId, String serviceId);
 
     public void setAggregationIntervalMillis(int aggregationIntervalMillis);
 
