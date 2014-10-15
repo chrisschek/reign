@@ -50,7 +50,7 @@ public interface MetricRegistryManager {
      */
     public MetricRegistry rotateAsNecessary();
 
-    public int getRotationInterval();
+    public long getRotationInterval();
 
     public TimeUnit getRotationTimeUnit();
 
