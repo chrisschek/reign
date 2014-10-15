@@ -77,8 +77,8 @@ public class StaticMetricRegistryManager implements MetricRegistryManager {
     }
 
     @Override
-    public int getRotationInterval() {
-        return Integer.MAX_VALUE;
+    public long getRotationInterval() {
+        return Long.MAX_VALUE;
     }
 
     @Override
