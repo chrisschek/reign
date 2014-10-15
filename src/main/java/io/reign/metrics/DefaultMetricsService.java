@@ -658,7 +658,7 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
                                 dataNodes.size() + 1, 1.0f);
                         int dataNodeCount = 0;
                         int dataNodeInWindowCount = 0;
-                        Integer intervalLength = null;
+                        Long intervalLength = null;
                         TimeUnit intervalLengthUnit = null;
                         long currentTimestamp = System.currentTimeMillis();
                         for (String dataNode : dataNodes) {

@@ -52,7 +52,7 @@ public class MetricsData {
 
     private Long intervalStartTimestamp;
 
-    private Integer intervalLength;
+    private Long intervalLength;
 
     private TimeUnit intervalLengthUnit;
 
@@ -110,11 +110,11 @@ public class MetricsData {
         this.intervalStartTimestamp = intervalStartTimestamp;
     }
 
-    public Integer getIntervalLength() {
+    public Long getIntervalLength() {
         return intervalLength;
     }
 
-    public void setIntervalLength(Integer intervalLength) {
+    public void setIntervalLength(Long intervalLength) {
         this.intervalLength = intervalLength;
     }
 
