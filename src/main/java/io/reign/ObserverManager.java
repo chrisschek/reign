@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.KeeperException.Code;
 import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +78,8 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
 
     private volatile int sweeperIntervalMillis = 30000;
 
+    private volatile boolean recheckAllRequired = false;
+
     public ObserverManager(ZkClient zkClient) {
         this.zkClient = zkClient;
     }
@@ -95,6 +98,32 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
 
     public void destroy() {
         scheduledExecutorService.shutdown();
+    }
+
+    @Override
+    public synchronized void connected(WatchedEvent event) {
+        logger.info("ZK connection established!");
+        if (recheckAllRequired) {
+            recheckAllRequired = false;
+
+            // schedule a recheck for all observed paths
+            for (String path : observerMap.keySet()) {
+                logger.info("Scheduling re-check for all observed path due to ZK session expiration:  path={}", path);
+                scheduleCheck(path, EventType.None);
+            }
+        }
+    }
+
+    @Override
+    public void disconnected(WatchedEvent event) {
+        logger.warn("ZK connection lost:  recheck will be scheduled for all observed nodes on reconnect.");
+        recheckAllRequired = true;
+    }
+
+    @Override
+    public void sessionExpired(WatchedEvent event) {
+        logger.warn("ZK session expired:  recheck will be scheduled for all observed nodes on reconnect.");
+        recheckAllRequired = true;
     }
 
     void updateObserver(String path, T observer) {
@@ -164,7 +193,10 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
     }
 
     void scheduleCheck(final WatchedEvent event) {
-        final String path = event.getPath();
+        scheduleCheck(event.getPath(), event.getType());
+    }
+
+    void scheduleCheck(final String path, final EventType eventType) {
 
         // do not schedule a check if we have scheduled a check recently
         synchronized (observerScheduledCheckTimestampMap) {
@@ -173,7 +205,7 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
                 long timeToCheck = scheduledCheckTimestamp - System.currentTimeMillis();
                 if (timeToCheck > this.sweeperIntervalMillis / 2) {
                     logger.trace("Ignoring:  re-check already scheduled:  path={}; eventType={}; timeToCheckMillis={}",
-                            event.getPath(), event.getType(), timeToCheck);
+                            path, eventType, timeToCheck);
                     return;
                 }
             }
@@ -183,7 +215,7 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
         }
 
         logger.debug("Scheduling re-check after watch triggered:  path={}; eventType={}; timeToCheckMillis={}",
-                event.getPath(), event.getType(), sweeperIntervalMillis);
+                path, eventType, sweeperIntervalMillis);
 
         this.scheduledExecutorService.schedule(new Runnable() {
 
@@ -254,9 +286,12 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
 
     @Override
     public boolean filterWatchedEvent(WatchedEvent event) {
-        if (this.getObserverSet(event.getPath(), false).size() == 0) {
-            // ignore events that are not being tracked by an observer
-            return true;
+        String path = event.getPath();
+        if (path != null) {
+            if (this.getObserverSet(path, false).size() == 0) {
+                // ignore events that are not being tracked by an observer
+                return true;
+            }
         }
         return false;
     }
@@ -264,6 +299,7 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
     @Override
     public void nodeChildrenChanged(final WatchedEvent event) {
         delegatorExecutorService.submit(new Runnable() {
+            @Override
             public void run() {
                 String path = event.getPath();
                 logger.debug("Notifying ALL observers:  nodeChildrenChanged:  path={}", path);
@@ -339,6 +375,7 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
     @Override
     public void nodeCreated(final WatchedEvent event) {
         delegatorExecutorService.submit(new Runnable() {
+            @Override
             public void run() {
                 String path = event.getPath();
                 logger.debug("Notifying ALL observers:  nodeCreated:  path={}", path);
@@ -381,6 +418,7 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
     @Override
     public void nodeDataChanged(final WatchedEvent event) {
         delegatorExecutorService.submit(new Runnable() {
+            @Override
             public void run() {
                 String path = event.getPath();
                 logger.debug("Notifying ALL observers:  nodeDataChanged:  path={}", path);
@@ -419,6 +457,7 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
     @Override
     public void nodeDeleted(final WatchedEvent event) {
         delegatorExecutorService.submit(new Runnable() {
+            @Override
             public void run() {
                 String path = event.getPath();
                 logger.debug("Notifying ALL observers:  nodeDeleted:  path={}", path);
@@ -461,6 +500,7 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
 
     public void signalStateReset(final Object o) {
         delegatorExecutorService.submit(new Runnable() {
+            @Override
             public void run() {
                 logger.warn("Notifying ALL observers:  signalStateReset");
                 for (String path : observerMap.keySet()) {
@@ -475,6 +515,7 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
 
     public void signalStateUnknown(final Object o) {
         delegatorExecutorService.submit(new Runnable() {
+            @Override
             public void run() {
                 logger.warn("Notifying ALL observers:  signalStateUnknown");
                 for (String path : observerMap.keySet()) {
