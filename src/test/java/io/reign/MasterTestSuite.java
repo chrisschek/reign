@@ -33,7 +33,7 @@ public class MasterTestSuite {
 
 	private static final Logger logger = LoggerFactory.getLogger(MasterTestSuite.class);
 
-	private static TestingServer zkTestServer;
+	// private static TestingServer zkTestServer;
 
 	private static final AtomicBoolean startedFlag = new AtomicBoolean(false);
 	private static final AtomicBoolean stoppedFlag = new AtomicBoolean(false);
@@ -62,6 +62,7 @@ public class MasterTestSuite {
 		}
 
 		/** bootstrap a real ZooKeeper instance **/
+                /*
 		logger.debug("Starting Test ZooKeeper server...");
 		try {
 			String dataDirectory = System.getProperty("java.io.tmpdir");
@@ -75,10 +76,11 @@ public class MasterTestSuite {
 		} catch (Exception e) {
 			logger.error("Trouble starting test ZooKeeper instance:  " + e, e);
 		}
+                */
 
 		/** init and start reign using builder **/
-		reign = Reign.maker().messagingPort(33133).zkClient("localhost:" + MasterTestSuite.ZK_TEST_SERVER_PORT, 30000)
-		        .pathCache(1024, 8).startHook(startHook()).stopHook(stopHook()).get();
+		reign = Reign.maker().messagingPort(33133).zkClientTestMode(ZK_TEST_SERVER_PORT, 30000)
+		        .startHook(startHook()).stopHook(stopHook()).get();
 
 		// test started hook
 		assertFalse("Unexpected before start:  " + startedFlag.get(), startedFlag.get());
@@ -121,7 +123,7 @@ public class MasterTestSuite {
 
 			logger.debug("Stopping Test ZooKeeper server...");
 
-			zkTestServer.stop();
+			// zkTestServer.stop();
 
 		} catch (Exception e) {
 			logger.error("Trouble starting test ZooKeeper instance:  " + e, e);
