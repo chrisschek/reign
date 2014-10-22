@@ -265,7 +265,7 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
 
 	@Override
 	public boolean filterWatchedEvent(WatchedEvent event) {
-		if (this.getObserverSet(event.getPath(), false).size() == 0) {
+		if (event.getPath()!=null && this.getObserverSet(event.getPath(), false).size() == 0) {
 			// ignore events that are not being tracked by an observer
 			return true;
 		}
@@ -594,6 +594,10 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
 	}
 
 	Set<T> getObserverSet(String path, boolean createIfNecessary) {
+		if( path==null ) {
+                    throw new IllegalArgumentException("path cannot be null!");
+                }
+
 		Set<T> observerSet = observerMap.get(path);
 
 		if (observerSet == null) {
