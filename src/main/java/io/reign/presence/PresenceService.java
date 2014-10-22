@@ -206,38 +206,47 @@ public class PresenceService extends AbstractService {
 		getObserverManager().put(path, observer);
 	}
 
-	public ServiceInfo waitUntilAvailable(String clusterId, String serviceId, long timeoutMillis) {
 
-		String servicePath = getPathScheme().joinTokens(clusterId, serviceId);
-		String path = getPathScheme().getAbsolutePath(PathType.PRESENCE, servicePath);
+        
+    public ServiceInfo waitUntilAvailable(String clusterId, String serviceId, long timeoutMillis) {
 
-		PresenceObserver<ServiceInfo> notifyObserver = getNotifyObserver(clusterId, serviceId);
+        String servicePath = getPathScheme().joinTokens(clusterId, serviceId);
+        String path = getPathScheme().getAbsolutePath(PathType.PRESENCE, servicePath);
 
-		ServiceInfo result = null;
-		synchronized (notifyObserver) {
-			try {
-				if (timeoutMillis < 0) {
-					result = getServiceInfo(clusterId, serviceId, notifyObserver);
-					while (true && (result == null || result.getNodeIdList().size() < 1)) {
-						logger.info("Waiting until service is available:  path={}", path);
-						notifyObserver.wait(5000);
+        PresenceObserver<ServiceInfo> notifyObserver = getNotifyObserver(clusterId, serviceId);
 
-						result = getServiceInfo(clusterId, serviceId, notifyObserver);
-					}
-				} else {
-					logger.info("Waiting until service is available:  path={}", path);
-					notifyObserver.wait(timeoutMillis);
-					result = getServiceInfo(clusterId, serviceId, notifyObserver);
-				}
-			} catch (InterruptedException e) {
-				logger.warn("Interrupted in waitUntilAvailable():  " + e, e);
-			} // try
-		}// synchronized
+        ServiceInfo result = null;
+        long startTimestamp = System.currentTimeMillis();
+        synchronized (notifyObserver) {
+            try {
+                while ((result == null || result.getNodeIdList().size() < 1)
+                        && (timeoutMillis < 0 || System.currentTimeMillis() - startTimestamp < timeoutMillis)) {
+                    logger.info("Waiting until service is available:  path={}", path);
+                    if (timeoutMillis < 0) {
+                        result = getServiceInfo(clusterId, serviceId, notifyObserver);
+                        while (true && (result == null || result.getNodeIdList().size() < 1)) {
+                            notifyObserver.wait(5000);
+                            result = getServiceInfo(clusterId, serviceId, notifyObserver);
+                        }
+                    } else {
+                        long minWait = timeoutMillis / 4;
+                        if (minWait < 1000) {
+                            minWait = 1000;
+                        }
+                        notifyObserver.wait(Math.min(minWait, 5000));
+                        result = getServiceInfo(clusterId, serviceId, notifyObserver);
+                    }
+                }
+            } catch (InterruptedException e) {
+                logger.warn("Interrupted in waitUntilAvailable():  " + e, e);
+            } // try
+        }// synchronized
 
-		getContext().getObserverManager().remove(path, notifyObserver);
+        getContext().getObserverManager().remove(path, notifyObserver);
 
-		return result;
-	}
+        return result;
+    }
+
 
 	<T> PresenceObserver<T> getNotifyObserver(String clusterId, String serviceId) {
 		return getNotifyObserver(clusterId, serviceId, null);
@@ -356,38 +365,47 @@ public class PresenceService extends AbstractService {
 
 	}
 
-	public NodeInfo waitUntilAvailable(String clusterId, String serviceId, String nodeId, long timeoutMillis) {
 
-		String nodePath = getPathScheme().joinTokens(clusterId, serviceId, nodeId);
-		String path = getPathScheme().getAbsolutePath(PathType.PRESENCE, nodePath);
 
-		PresenceObserver<NodeInfo> notifyObserver = getNotifyObserver(clusterId, serviceId, nodeId);
-		NodeInfo result = null;
+    public NodeInfo waitUntilAvailable(String clusterId, String serviceId, String nodeId, long timeoutMillis) {
 
-		synchronized (notifyObserver) {
-			try {
-				if (timeoutMillis < 0) {
-					result = getNodeInfo(clusterId, serviceId, nodeId, notifyObserver);
-					while (true && result == null) {
-						logger.info("Waiting until node is available:  path={}", path);
-						notifyObserver.wait(5000);
+        String nodePath = getPathScheme().joinTokens(clusterId, serviceId, nodeId);
+        String path = getPathScheme().getAbsolutePath(PathType.PRESENCE, nodePath);
 
-						result = getNodeInfo(clusterId, serviceId, nodeId, notifyObserver);
-					}
-				} else {
-					logger.info("Waiting until node is available:  path={}", path);
-					notifyObserver.wait(timeoutMillis);
-					result = getNodeInfo(clusterId, serviceId, nodeId);
-				}
-			} catch (InterruptedException e) {
-				logger.warn("Interrupted while waiting for NodeInfo:  " + e, e);
-			}// try
-		}// synchronized
+        PresenceObserver<NodeInfo> notifyObserver = getNotifyObserver(clusterId, serviceId, nodeId);
+        NodeInfo result = null;
 
-		getContext().getObserverManager().remove(path, notifyObserver);
+        long startTimestamp = System.currentTimeMillis();
+        synchronized (notifyObserver) {
+            try {
+                while (result == null
+                        && (timeoutMillis < 0 || System.currentTimeMillis() - startTimestamp < timeoutMillis)) {
+                    logger.info("Waiting until node is available:  path={}", path);
+                    if (timeoutMillis < 0) {
+                        result = getNodeInfo(clusterId, serviceId, nodeId, notifyObserver);
+                        while (true && result == null) {
+                            notifyObserver.wait(5000);
+                            result = getNodeInfo(clusterId, serviceId, nodeId, notifyObserver);
+                        }
+                    } else {
+                        long minWait = timeoutMillis / 4;
+                        if (minWait < 1000) {
+                            minWait = 1000;
+                        }
+                        notifyObserver.wait(Math.min(minWait, 5000));
+                        result = getNodeInfo(clusterId, serviceId, nodeId);
+                    }
+                }
+            } catch (InterruptedException e) {
+                logger.warn("Interrupted while waiting for NodeInfo:  " + e, e);
+            }// try
+        }// synchronized
 
-		return result;
-	}
+        getContext().getObserverManager().remove(path, notifyObserver);
+
+        return result;
+    }
+
 
 	public NodeInfo getNodeInfo(String clusterId, String serviceId, String nodeId) {
 		return getNodeInfo(clusterId, serviceId, nodeId, null, nodeAttributeSerializer);
