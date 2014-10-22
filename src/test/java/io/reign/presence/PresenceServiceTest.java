@@ -45,24 +45,25 @@ public class PresenceServiceTest {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
                 }
-                presenceService.announce("clusterA", "serviceA1", true);
+                presenceService.announce("clusterTestWaitUntilAvailableService", "serviceA1.1", true);
             }
         };
         t1.start();
 
         // wait until service is available
         long start = System.currentTimeMillis();
-        ServiceInfo serviceInfo = presenceService.waitUntilAvailable("clusterA", "serviceA1", -1);
+        ServiceInfo serviceInfo = presenceService.waitUntilAvailable("clusterTestWaitUntilAvailableService",
+                "serviceA1.1", -1);
         long end = System.currentTimeMillis();
 
         assertTrue(
                 "serviceInfo==null = " + (serviceInfo == null) + "; nodeList="
                         + (serviceInfo != null ? serviceInfo.getNodeIdList() : null), serviceInfo != null
                         && serviceInfo.getNodeIdList().size() > 0);
-        assertTrue(end - start >= 3000);
+        assertTrue("Not expected time:  " + (end - start), end - start >= 3000);
 
         // restore to previous state at beginning of test
-        presenceService.hide("clusterA", "serviceA1");
+        presenceService.hide("clusterTestWaitUntilAvailableService", "serviceA1.1");
     }
 
     @Test
@@ -74,43 +75,41 @@ public class PresenceServiceTest {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
                 }
-                presenceService.announce("clusterA", "serviceA1", true);
+                presenceService.announce("clusterTestWaitUntilAvailableNode", "serviceA1.2", true);
             }
         };
         t1.start();
 
         // wait until service is available
         long start = System.currentTimeMillis();
-        NodeInfo nodeInfo = presenceService.waitUntilAvailable("clusterA", "serviceA1", nodeId, -1);
+        NodeInfo nodeInfo = presenceService.waitUntilAvailable("clusterTestWaitUntilAvailableNode", "serviceA1.2",
+                nodeId, -1);
         long end = System.currentTimeMillis();
 
         assertTrue("nodeInfo==null = " + (nodeInfo == null), nodeInfo != null);
-        assertTrue(end - start >= 3000);
+        assertTrue("Not expected time:  " + (end - start), end - start >= 3000);
 
         // restore to previous state at beginning of test
-        presenceService.hide("clusterA", "serviceA1");
+        presenceService.hide("clusterTestWaitUntilAvailableNode", "serviceA1.2");
     }
 
     @Test
     public void testLookupClusters() {
 
-        presenceService.announce("clusterA", "serviceA1", true);
-        presenceService.announce("clusterB", "serviceB1", true);
+        presenceService.announce("clusterTestGetClusters", "serviceA1", true);
 
         // announcements are processed asynchronously, so wait until services are available
-        presenceService.waitUntilAvailable("clusterA", "serviceA1", -1);
-        presenceService.waitUntilAvailable("clusterB", "serviceB1", -1);
+        presenceService.waitUntilAvailable("clusterTestGetClusters", "serviceA1", -1);
 
         List<String> clusterIdList = presenceService.getClusters();
 
         // should be 3 clusters, including the default "reign" cluster
-        assertTrue("Should be 3 but got " + clusterIdList.size() + ":  " + clusterIdList, clusterIdList.size() == 3);
-        assertTrue(clusterIdList.contains("clusterA"));
-        assertTrue(clusterIdList.contains("clusterB"));
+        assertTrue("Should be at least 2 but got " + clusterIdList.size() + ":  " + clusterIdList,
+                clusterIdList.size() >= 2);
+        assertTrue(clusterIdList.contains("clusterTestGetClusters"));
 
         // restore to previous state at beginning of test
-        presenceService.hide("clusterA", "serviceA1");
-        presenceService.hide("clusterB", "serviceB1");
+        presenceService.hide("clusterTestGetClusters", "serviceA1");
     }
 
     @Test
