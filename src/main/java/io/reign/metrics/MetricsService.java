@@ -322,7 +322,7 @@ public class MetricsService extends AbstractService {
 
 		logger.info("init() called");
 
-		executorService = new ScheduledThreadPoolExecutor(2);
+		executorService = new ScheduledThreadPoolExecutor(3);
 
 		// schedule admin activity
 		scheduleAggregation();
