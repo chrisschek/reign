@@ -92,6 +92,15 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
     private ScheduledExecutorService executorService;
     private volatile ScheduledFuture aggregationFuture;
 
+    private CounterMergeFunction counterMergeFunction = new CounterMergeFunction();
+    private HistogramMergeFunction histogramMergeFunction = new HistogramMergeFunction();
+    private MeterMergeFunction meterMergeFunction = new MeterMergeFunction();
+    private TimerMergeFunction timerMergeFunction = new TimerMergeFunction();
+
+    public DefaultMetricsService() {
+        super();
+    }
+
     @Override
     public void observe(final String clusterId, final String serviceId, MetricsObserver observer) {
         String servicePath = getPathScheme().joinTokens(clusterId, serviceId);
@@ -99,18 +108,18 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
         getObserverManager().put(path, observer);
     }
 
-    @Override
-    public MetricRegistryManager getRegistered(String clusterId, String serviceId) {
-        String key = exportPathMapKey(clusterId, serviceId, getContext().getNodeId());
-        synchronized (exportPathMap) {
-            ExportMeta exportMeta = exportPathMap.get(key);
-            if (exportMeta != null) {
-                return exportMeta.registryManager;
-            } else {
-                return null;
-            }
-        }
-    }
+    // @Override
+    // public MetricRegistryManager getRegistered(String clusterId, String serviceId) {
+    // String key = exportPathMapKey(clusterId, serviceId, getContext().getNodeId());
+    // synchronized (exportPathMap) {
+    // ExportMeta exportMeta = exportPathMap.get(key);
+    // if (exportMeta != null) {
+    // return exportMeta.registryManager;
+    // } else {
+    // return null;
+    // }
+    // }
+    // }
 
     /**
      * Registers metrics for export to ZK.
@@ -123,7 +132,11 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
     }
 
     String exportPathMapKey(String clusterId, String serviceId, String nodeId) {
-        return clusterId + "/" + serviceId + "/" + nodeId;
+        if (nodeId != null) {
+            return clusterId + "/" + serviceId + "/" + nodeId;
+        } else {
+            return clusterId + "/" + serviceId;
+        }
     }
 
     void scheduleExport(final String clusterId, final String serviceId, final String nodeId,
@@ -134,7 +147,16 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
             if (!exportPathMap.containsKey(key)) {
                 final ZkMetricsReporter reporter = ZkMetricsReporter.builder().convertRatesTo(TimeUnit.SECONDS)
                         .convertDurationsTo(TimeUnit.MILLISECONDS).build();
-                exportPathMap.put(key, new ExportMeta(null, registryManager, reporter));
+                ExportMeta exportMeta = new ExportMeta(null, registryManager, reporter);
+                exportPathMap.put(key, exportMeta);
+
+                // TODO: fix below later, not as clean as could be:
+                // if in unit test context, always put under regular node name so we can find gauge merge hints
+                if (!nodeId.equals(getContext().getNodeId())) {
+                    String serviceKey = exportPathMapKey(clusterId, serviceId, getContext().getNodeId());
+                    exportPathMap.put(serviceKey, exportMeta);
+                }
+
             } else {
                 logger.info("Metrics export already scheduled:  {}", key);
                 return;
@@ -229,7 +251,8 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
      */
     @Override
     public MetricsData getNodeMetrics(String clusterId, String serviceId) {
-        String key = clusterId + "/" + serviceId + "/" + getContext().getNodeId();
+        // String key = clusterId + "/" + serviceId + "/" + getContext().getNodeId();
+        String key = exportPathMapKey(clusterId, serviceId, getContext().getNodeId());
         ExportMeta exportMeta = exportPathMap.get(key);
         if (exportMeta == null) {
             logger.trace(
@@ -777,24 +800,36 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
                             // "counterList size does not match nodeCount:  counterList.size={}; nodeCount={}",
                             // counterList.size(), dataNodeCount);
                             // }
-                            CounterData counterData = CounterData.merge(counterList);
-                            counters.put(key, counterData);
+                            if (counterList != null && counterList.size() > 0) {
+                                CounterData counterData = counterMergeFunction.merge(counterList);
+                                counters.put(key, counterData);
+                            }
                         }
                         serviceMetricsData.setCounters(counters);
 
-                        // gauges
-                        Map<String, GaugeData> gauges = new HashMap<String, GaugeData>(gaugeMap.size() + 1, 1.0f);
-                        for (String key : gaugeMap.keySet()) {
-                            List<GaugeData> gaugeList = gaugeMap.get(key);
-                            // if (gaugeList.size() != dataNodeCount) {
-                            // logger.warn(
-                            // "gaugeList size does not match nodeCount:  gaugeList.size={}; nodeCount={}",
-                            // gaugeList.size(), dataNodeCount);
-                            // }
-                            GaugeData gaugeData = GaugeData.merge(gaugeList);
-                            gauges.put(key, gaugeData);
-                        }
-                        serviceMetricsData.setGauges(gauges);
+                        /** gauges **/
+                        // get the registry manager with merge functions for each gauge (don't merge if not specified)
+                        String exportMetaKey = exportPathMapKey(clusterId, serviceId, getContext().getNodeId());
+                        ExportMeta exportMeta = exportPathMap.get(exportMetaKey);
+                        logger.debug("GAUGE MERGE:  exportMetaKey={}; exportMeta={}", exportMetaKey, exportMeta);
+                        if (exportMeta != null) {
+                            MetricRegistryManager registryManager = exportMeta.registryManager;
+                            Map<String, GaugeData> gauges = new HashMap<String, GaugeData>(gaugeMap.size() + 1, 1.0f);
+                            for (String key : gaugeMap.keySet()) {
+                                List<GaugeData> gaugeList = gaugeMap.get(key);
+                                if (gaugeList != null && gaugeList.size() > 0) {
+                                    MergeFunction mergeFunction = registryManager.getGaugeMergeFunction(key);
+                                    logger.debug("GAUGE MERGE:  gauge={}; mergeFunction={}", key, mergeFunction);
+                                    if (mergeFunction != null) {
+                                        GaugeData gaugeData = (GaugeData) mergeFunction.merge(gaugeList);
+                                        if (gaugeData != null) {
+                                            gauges.put(key, gaugeData);
+                                        }
+                                    }
+                                }
+                            }
+                            serviceMetricsData.setGauges(gauges);
+                        } // if
 
                         // histograms
                         Map<String, HistogramData> histograms = new HashMap<String, HistogramData>(
@@ -806,8 +841,10 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
                             // "histogramList size does not match nodeCount:  histogramList.size={}; nodeCount={}",
                             // histogramList.size(), dataNodeCount);
                             // }
-                            HistogramData histogramData = HistogramData.merge(histogramList);
-                            histograms.put(key, histogramData);
+                            if (histogramList != null && histogramList.size() > 0) {
+                                HistogramData histogramData = histogramMergeFunction.merge(histogramList);
+                                histograms.put(key, histogramData);
+                            }
                         }
                         serviceMetricsData.setHistograms(histograms);
 
@@ -820,8 +857,10 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
                             // "meterList size does not match nodeCount:  meterList.size={}; nodeCount={}",
                             // meterList.size(), dataNodeCount);
                             // }
-                            MeterData meterData = MeterData.merge(meterList);
-                            meters.put(key, meterData);
+                            if (meterList != null && meterList.size() > 0) {
+                                MeterData meterData = meterMergeFunction.merge(meterList);
+                                meters.put(key, meterData);
+                            }
                         }
                         serviceMetricsData.setMeters(meters);
 
@@ -834,8 +873,10 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
                             // "timerList size does not match nodeCount:  timerList.size={}; nodeCount={}",
                             // timerList.size(), dataNodeCount);
                             // }
-                            TimerData timerData = TimerData.merge(timerList);
-                            timers.put(key, timerData);
+                            if (timerList != null && timerList.size() > 0) {
+                                TimerData timerData = timerMergeFunction.merge(timerList);
+                                timers.put(key, timerData);
+                            }
                         }
                         serviceMetricsData.setTimers(timers);
 

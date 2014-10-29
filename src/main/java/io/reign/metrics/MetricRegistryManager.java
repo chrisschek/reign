@@ -44,6 +44,14 @@ public interface MetricRegistryManager {
 
     public MetricRegistry get();
 
+    public void setGaugeMergeFunction(String gaugeName, MergeFunction<?> mergeFunction);
+
+    public void removeGaugeMergeFunction(String gaugeName);
+
+    public void removeAllGaugeMergeFunctions();
+
+    public MergeFunction<?> getGaugeMergeFunction(String gaugeName);
+
     /**
      * 
      * @return old MetricRegistry if rotated; current MetricRegistry otherwise

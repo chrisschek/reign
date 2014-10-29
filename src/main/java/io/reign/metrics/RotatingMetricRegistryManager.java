@@ -17,6 +17,7 @@ import io.reign.util.TimeUnitUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,6 +50,7 @@ public class RotatingMetricRegistryManager implements MetricRegistryManager {
     private final TimeUnit rotationTimeUnit;
     private final long rotationIntervalMillis;
     private List<MetricRegistryManagerCallback> callbackList = Collections.EMPTY_LIST;
+    private Map<String, MergeFunction<?>> gaugeMergeFunctionMap = Collections.EMPTY_MAP;
 
     public RotatingMetricRegistryManager(long rotationInterval, TimeUnit rotationTimeUnit) {
         this(new MetricRegistry(), rotationInterval, rotationTimeUnit);
@@ -80,15 +82,68 @@ public class RotatingMetricRegistryManager implements MetricRegistryManager {
     }
 
     @Override
+    public MergeFunction<?> getGaugeMergeFunction(String gaugeName) {
+        return gaugeMergeFunctionMap.get(gaugeName);
+    }
+
+    @Override
+    public void setGaugeMergeFunction(String gaugeName, MergeFunction<?> mergeFunction) {
+        synchronized (gaugeMergeFunctionMap) {
+            if (gaugeMergeFunctionMap == Collections.EMPTY_MAP) {
+                gaugeMergeFunctionMap = new HashMap<String, MergeFunction<?>>();
+
+                synchronized (gaugeMergeFunctionMap) {
+                    if (gaugeMergeFunctionMap.containsKey(gaugeName)) {
+                        return;
+                    }
+                    gaugeMergeFunctionMap.put(gaugeName, mergeFunction);
+                }
+            } else {
+                if (gaugeMergeFunctionMap.containsKey(gaugeName)) {
+                    return;
+                }
+                gaugeMergeFunctionMap.put(gaugeName, mergeFunction);
+            }
+        }
+
+    }
+
+    @Override
+    public void removeGaugeMergeFunction(String gaugeName) {
+        synchronized (gaugeMergeFunctionMap) {
+            if (gaugeMergeFunctionMap == Collections.EMPTY_MAP) {
+                return;
+            }
+            gaugeMergeFunctionMap.remove(gaugeName);
+        }
+    }
+
+    @Override
+    public void removeAllGaugeMergeFunctions() {
+        synchronized (gaugeMergeFunctionMap) {
+            gaugeMergeFunctionMap = Collections.EMPTY_MAP;
+        }
+    }
+
+    @Override
     public void registerCallback(MetricRegistryManagerCallback callback) {
         synchronized (callbackList) {
             if (callbackList == Collections.EMPTY_LIST) {
                 callbackList = new ArrayList<MetricRegistryManagerCallback>();
+
+                // reference changed
+                synchronized (callbackList) {
+                    if (callbackList.contains(callback)) {
+                        return;
+                    }
+                    callbackList.add(callback);
+                }
+            } else {
+                if (callbackList.contains(callback)) {
+                    return;
+                }
+                callbackList.add(callback);
             }
-            if (callbackList.contains(callback)) {
-                return;
-            }
-            callbackList.add(callback);
         }
     }
 
@@ -105,10 +160,7 @@ public class RotatingMetricRegistryManager implements MetricRegistryManager {
     @Override
     public void removeAllCallbacks() {
         synchronized (callbackList) {
-            if (callbackList == Collections.EMPTY_LIST) {
-                return;
-            }
-            callbackList.clear();
+            callbackList = Collections.EMPTY_LIST;
         }
     }
 
