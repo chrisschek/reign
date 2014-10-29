@@ -1,5 +1,7 @@
 package io.reign.metrics;
 
+import io.reign.util.JacksonUtil;
+
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Map;
@@ -327,6 +329,7 @@ public class ZkMetricsReporter {
 
     private void reportGauge(StringBuilder sb, String name, Gauge gauge) {
         report(sb, name, new String[] { "value" }, gauge.getValue());
+
     }
 
     private void report(StringBuilder sb, String name, String[] keys, Object... values) {
@@ -340,7 +343,18 @@ public class ZkMetricsReporter {
             String key = keys[i];
             sb.append("\"").append(key).append("\"");
             sb.append(":");
-            sb.append("\"").append(values[i]).append("\"");
+
+            if (values[i] instanceof String) {
+                sb.append("\"").append(values[i]).append("\"");
+            } else if (values[i] instanceof Number) {
+                sb.append(values[i]);
+            } else {
+                try {
+                    sb.append(JacksonUtil.getObjectMapper().writeValueAsString(values[i]));
+                } catch (Exception e) {
+                    logger.error("" + e, e);
+                }
+            }
         }
         sb.append("}");
 
