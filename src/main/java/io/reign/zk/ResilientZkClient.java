@@ -739,11 +739,11 @@ public class ResilientZkClient implements ZkClient, Watcher {
             @Override
             public ZooKeeper.States doPerform() throws KeeperException, InterruptedException {
                 // if we are not connected
-                if (!shutdown) {
+                if (zooKeeper != null) {
                     return zooKeeper.getState();
-                } else {
-                    return null;
                 }
+                return null;
+
             }
         };
 
@@ -935,6 +935,8 @@ public class ResilientZkClient implements ZkClient, Watcher {
 
     synchronized void spawnReconnectThread() {
         if (zooKeeper == null || zooKeeper.getState() == ZooKeeper.States.CLOSED) {
+            logger.info("Spawning thread to connect to ZooKeeper...");
+
             // do connection in another thread so as to not block the ZK event thread
             Thread reconnectThread = new Thread() {
                 @Override
@@ -1081,7 +1083,7 @@ public class ResilientZkClient implements ZkClient, Watcher {
                     // established
                     this.notifyAll();
                 }
-                logger.info("SyncConnected:  notified all waiters:  currentSessionId={}; connectString={}",
+                logger.trace("SyncConnected:  notified all waiters:  currentSessionId={}; connectString={}",
                         currentSessionId, getConnectString());
 
             } else if (eventState == Event.KeeperState.Disconnected) {
