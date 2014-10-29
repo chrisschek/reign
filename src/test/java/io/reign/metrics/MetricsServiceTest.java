@@ -55,16 +55,19 @@ public class MetricsServiceTest {
             public void updated(MetricsData updated, MetricsData previous) {
                 calledCount.incrementAndGet();
 
-                logger.debug(
-                        "*** OBSERVER (testObserver):  calledCount={}; updated.observerTestCounter={}; previous.observerTestCounter={}",
-                        calledCount.get(), updated != null ? updated.getCounter("observerTestCounter").getCount()
-                                : null,
-                        previous != null ? previous.getCounter("observerTestCounter").getCount() : null);
-
                 latest.set(updated);
                 synchronized (calledCount) {
                     calledCount.notifyAll();
                 }
+
+                logger.debug(
+                        "*** OBSERVER (testObserver):  calledCount={}; updated.observerTestCounter={}; previous.observerTestCounter={}",
+                        calledCount.get(),
+                        updated != null ? (updated.getCounter("observerTestCounter") != null ? updated.getCounter(
+                                "observerTestCounter").getCount() : null)
+                                : null,
+                        previous != null ? (previous.getCounter("observerTestCounter") != null ? previous
+                                .getCounter("observerTestCounter").getCount() : null) : null);
             }
         });
 
@@ -189,8 +192,7 @@ public class MetricsServiceTest {
 
     @Test
     public void testExportSelfMetrics() throws Exception {
-        MetricRegistryManager registryManager = getMetricRegistryManager(new RotatingMetricRegistryManager(300,
-                TimeUnit.SECONDS));
+        MetricRegistryManager registryManager = getMetricRegistryManager(new StaticMetricRegistryManager());
         metricsService.scheduleExport("clusterMetrics", "serviceA", registryManager, 5, TimeUnit.SECONDS);
 
         MetricsData metricsData = metricsService.getNodeMetrics("clusterMetrics", "serviceA");
@@ -206,8 +208,8 @@ public class MetricsServiceTest {
         assertTrue("Unexpected value:  " + counter2Data.getCount(), counter2Data.getCount() == 2L);
 
         // gauges
-        GaugeData gauge1 = metricsData.getGauge("gauge1");
-        GaugeData gauge2 = metricsData.getGauge("gauge2");
+        GaugeData<Integer> gauge1 = metricsData.getGauge("gauge1");
+        GaugeData<Integer> gauge2 = metricsData.getGauge("gauge2");
         assertTrue(gauge1.getValue() == 1.0);
         assertTrue(gauge2.getValue() == 2.0);
 
@@ -264,8 +266,8 @@ public class MetricsServiceTest {
         assertTrue(counter2Data.getCount() == 4L);
 
         // gauges
-        GaugeData gauge1 = metricsData.getGauge("gauge1");
-        GaugeData gauge2 = metricsData.getGauge("gauge2");
+        GaugeData<Integer> gauge1 = metricsData.getGauge("gauge1");
+        GaugeData<Integer> gauge2 = metricsData.getGauge("gauge2");
         assertTrue(gauge1.getValue() == 1.0);
         assertTrue(gauge2.getValue() == 2.0);
 
@@ -302,10 +304,6 @@ public class MetricsServiceTest {
     }
 
     MetricRegistryManager getMetricRegistryManager(MetricRegistryManager registryManager) throws Exception {
-        // RotatingMetricRegistryManager registryManager = new
-        // RotatingMetricRegistryManager(300, TimeUnit.SECONDS);
-        // MetricRegistryManager registryManager = new
-        // StaticMetricRegistryManager();
 
         // counters
         Counter counter1 = registryManager.get().counter(MetricRegistry.name("counter1"));
@@ -314,18 +312,25 @@ public class MetricsServiceTest {
         counter2.inc(2);
 
         // gauges
-        Gauge<Integer> gauge1 = registryManager.get().register(MetricRegistry.name("gauge1"), new Gauge<Integer>() {
-            @Override
-            public Integer getValue() {
-                return 1;
-            }
-        });
-        Gauge<Integer> gauge2 = registryManager.get().register(MetricRegistry.name("gauge2"), new Gauge<Integer>() {
-            @Override
-            public Integer getValue() {
-                return 2;
-            }
-        });
+        Gauge<Integer> gauge1 = registryManager.get().register(MetricRegistry.name("gauge1"),
+                new Gauge<Integer>() {
+                    @Override
+                    public Integer getValue() {
+                        return 1;
+                    }
+
+                });
+        Gauge<Integer> gauge2 = registryManager.get().register(MetricRegistry.name("gauge2"),
+                new Gauge<Integer>() {
+                    @Override
+                    public Integer getValue() {
+                        return 2;
+                    }
+
+                });
+
+        registryManager.setGaugeMergeFunction("gauge1", new AvgMergeFunction<Integer>());
+        registryManager.setGaugeMergeFunction("gauge2", new AvgMergeFunction<Integer>());
 
         // meters
         Meter meter1 = registryManager.get().meter(MetricRegistry.name("meter1"));
