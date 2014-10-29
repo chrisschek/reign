@@ -189,8 +189,7 @@ public class MetricsServiceTest {
 
     @Test
     public void testExportSelfMetrics() throws Exception {
-        MetricRegistryManager registryManager = getMetricRegistryManager(new RotatingMetricRegistryManager(300,
-                TimeUnit.SECONDS));
+        MetricRegistryManager registryManager = getMetricRegistryManager(new StaticMetricRegistryManager());
         metricsService.scheduleExport("clusterMetrics", "serviceA", registryManager, 5, TimeUnit.SECONDS);
 
         MetricsData metricsData = metricsService.getMyMetrics("clusterMetrics", "serviceA");
