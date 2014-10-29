@@ -287,8 +287,11 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
     @Override
     public boolean filterWatchedEvent(WatchedEvent event) {
         String path = event.getPath();
+        logger.trace("filterWatchedEvent():  path={}; type={}", path, event.getType());
         if (path != null) {
             if (this.getObserverSet(path, false).size() == 0) {
+                logger.trace("filterWatchedEvent():  ignoring event:  path={}; type={}", path, event.getType());
+
                 // ignore events that are not being tracked by an observer
                 return true;
             }
@@ -417,10 +420,11 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
 
     @Override
     public void nodeDataChanged(final WatchedEvent event) {
+        final String path = event.getPath();
+        logger.trace("Submitting runnable to notify observers:  nodeDataChanged:  path={};", path);
         delegatorExecutorService.submit(new Runnable() {
             @Override
             public void run() {
-                String path = event.getPath();
                 logger.debug("Notifying ALL observers:  nodeDataChanged:  path={}", path);
                 try {
                     Set<T> observerSet = getObserverSet(path, false);
