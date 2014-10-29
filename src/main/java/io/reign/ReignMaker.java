@@ -269,7 +269,7 @@ public class ReignMaker {
         return this;
     }
 
-    public TestingServer startZkTestServer(int zkPort) {
+    TestingServer startZkTestServer(int zkPort) {
 
         logger.debug("Starting in-process ZooKeeper server on port {} -- meant for testing only!", zkPort);
         try {
