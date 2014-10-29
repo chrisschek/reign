@@ -82,9 +82,9 @@
 
 		<!-- Kryo object serialization framework with dependencies: http://code.google.com/p/kryo/ -->
 		<dependency>
-			<groupId>com.esotericsoftware.kryo</groupId>
+			<groupId>com.esotericsoftware</groupId>
 			<artifactId>kryo</artifactId>
-			<version>2.22</version>
+			<version>3.0.0</version>
 			<optional>true</optional>
 		</dependency>
 
