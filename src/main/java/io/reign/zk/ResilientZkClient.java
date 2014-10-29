@@ -63,7 +63,7 @@ public class ResilientZkClient implements ZkClient, Watcher {
     private volatile BackoffStrategyFactory backoffStrategyFactory = DEFAULT_BACKOFF_STRATEGY_FACTORY;
 
     private volatile Long currentSessionId;
-    private volatile byte[] sessionPassword;
+    // private volatile byte[] sessionPassword;
 
     private volatile ZooKeeper zooKeeper;
 
@@ -94,7 +94,6 @@ public class ResilientZkClient implements ZkClient, Watcher {
         this.connectString = connectString;
         this.sessionTimeoutMillis = sessionTimeoutMillis;
         this.currentSessionId = sessionId;
-        this.sessionPassword = sessionPassword;
         this.zooKeeper = new ZooKeeper(connectString, sessionTimeoutMillis, this, sessionId, sessionPassword);
     }
 
@@ -941,7 +940,7 @@ public class ResilientZkClient implements ZkClient, Watcher {
             Thread reconnectThread = new Thread() {
                 @Override
                 public void run() {
-                    connect(backoffStrategyFactory.get(), true);
+                    connect(backoffStrategyFactory.get());
                 }
             };
             reconnectThread.setName(this.getClass().getSimpleName() + ".zkConnectThread-"
@@ -954,11 +953,12 @@ public class ResilientZkClient implements ZkClient, Watcher {
     /**
      * 
      */
-    synchronized void connect(BackoffStrategy backoffStrategy, boolean force) {
-        /**
-         * explicitly close current connection and attempt reconnect
-         **/
-        if (force) {
+    synchronized void connect(BackoffStrategy backoffStrategy) {
+
+        /** attempt reconnection if necessary **/
+        while (requiresExplicitZkReconnect() && !this.shutdown) {
+
+            // explicitly close current connection and attempt reconnect
             if (this.zooKeeper != null) {
                 try {
                     if (logger.isInfoEnabled()) {
@@ -972,36 +972,15 @@ public class ResilientZkClient implements ZkClient, Watcher {
             }
             this.zooKeeper = null;
             this.currentSessionId = null;
-        }
 
-        /** attempt reconnection if necessary **/
-        while (requiresExplicitZkReconnect() && !this.shutdown) {
-            // close existing ZK connection if necessary
-            // if (this.zooKeeper != null) {
-            // try {
-            // if (logger.isInfoEnabled()) {
-            // logger.info("Closing ZooKeeper session:  currentSessionId={}; connectString={}",
-            // currentSessionId, getConnectString());
-            // }
-            //
-            // this.zooKeeper.close();
-            // } catch (InterruptedException e) {
-            // logger.warn("Sleep interrupted while closing existing ZooKeeper session:  " + e, e);
-            // } // try
-            // }
-
-            // reconnect to ZK
+            // connect to ZK
             try {
                 if (logger.isInfoEnabled()) {
                     logger.info("Connecting to ZooKeeper:  currentSessionId={}; connectString={}", currentSessionId,
                             getConnectString());
                 }
-                if (currentSessionId == null) {
-                    this.zooKeeper = new ZooKeeper(getConnectString(), getSessionTimeout(), this);
-                } else {
-                    this.zooKeeper = new ZooKeeper(getConnectString(), getSessionTimeout(), this, currentSessionId,
-                            sessionPassword);
-                }
+
+                this.zooKeeper = new ZooKeeper(getConnectString(), getSessionTimeout(), this);
 
                 synchronized (this) {
                     this.wait(ASSUME_ERROR_TIMEOUT_MS + 10000);
@@ -1074,7 +1053,6 @@ public class ResilientZkClient implements ZkClient, Watcher {
                 }
 
                 this.currentSessionId = this.zooKeeper.getSessionId();
-                this.sessionPassword = this.zooKeeper.getSessionPasswd();
 
                 logger.info("SyncConnected:  notifying all waiters:  currentSessionId={}; connectString={}",
                         currentSessionId, getConnectString());
