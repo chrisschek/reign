@@ -22,12 +22,17 @@ import io.reign.util.JacksonUtil;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 
  * @author ypai
  * 
  */
 public abstract class MetricsObserver extends AbstractObserver {
+
+    private static final Logger logger = LoggerFactory.getLogger(MetricsObserver.class);
 
     public abstract void updated(MetricsData updated, MetricsData previous);
 
@@ -63,7 +68,11 @@ public abstract class MetricsObserver extends AbstractObserver {
             return null;
         }
         try {
+            logger.debug("toMetricsData():  bytes.length={}", bytes != null ? bytes.length
+                    : "null");
+
             MetricsData metricsData = JacksonUtil.getObjectMapper().readValue(bytes, MetricsData.class);
+
             return metricsData;
         } catch (Exception e) {
             throw new ReignException(e);
