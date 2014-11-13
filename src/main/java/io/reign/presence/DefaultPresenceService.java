@@ -32,6 +32,7 @@ import io.reign.mesg.ResponseMessage;
 import io.reign.mesg.ResponseStatus;
 import io.reign.mesg.SimpleEventMessage;
 import io.reign.mesg.SimpleResponseMessage;
+import io.reign.util.ReignClientUtil;
 import io.reign.util.ZkClientUtil;
 
 import java.util.Collections;
@@ -729,7 +730,7 @@ public class DefaultPresenceService extends AbstractService implements PresenceS
 
     }
 
-    <T> PresenceObserver<T> getClientObserver(final NodeAddress clientNodeInfo, final String clusterId,
+    <T> PresenceObserver<T> getClientObserver(final NodeAddress nodeAddress, final String clusterId,
             final String serviceId, final String nodeId) {
         PresenceObserver<T> observer = new PresenceObserver<T>() {
             @Override
@@ -746,7 +747,7 @@ public class DefaultPresenceService extends AbstractService implements PresenceS
 
                     MessagingService messagingService = getContext().getService("mesg");
                     messagingService.sendMessageFF(getContext().getPathScheme().getFrameworkClusterId(),
-                            Reign.CLIENT_SERVICE_ID, clientNodeInfo, eventMessage);
+                            Reign.CLIENT_SERVICE_ID, nodeAddress, eventMessage);
                 } catch (Exception e) {
                     logger.warn("Trouble notifying client observer:  " + e, e);
                 }
@@ -754,7 +755,8 @@ public class DefaultPresenceService extends AbstractService implements PresenceS
             }
         };
 
-        observer.setOwnerId(clientNodeInfo.getNodeId());
+        observer.setOwnerId(ReignClientUtil.getNodeId(null, nodeAddress.getIpAddress(), nodeAddress.getHost(),
+                nodeAddress.getMessagingPort()));
 
         return observer;
     }

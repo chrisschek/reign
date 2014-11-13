@@ -23,11 +23,9 @@ package io.reign;
  */
 public interface NodeAddress {
 
-	public String getNodeId();
+    public String getIpAddress();
 
-	public String getIpAddress();
+    public String getHost();
 
-	public String getHost();
-
-	public Integer getMessagingPort();
+    public Integer getMessagingPort();
 }

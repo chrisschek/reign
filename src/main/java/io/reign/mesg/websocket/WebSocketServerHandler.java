@@ -22,6 +22,7 @@ import io.reign.mesg.ResponseMessage;
 import io.reign.presence.PresenceService;
 import io.reign.util.IdUtil;
 import io.reign.util.JacksonUtil;
+import io.reign.util.ReignClientUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -436,8 +437,8 @@ public class WebSocketServerHandler extends ExecutionHandler {
         String clientIpAddress = IdUtil.getClientIpAddress(socketAddress);
         String clientHostname = IdUtil.getClientHostname(socketAddress);
         Integer clientMessagingPort = IdUtil.getClientPort(socketAddress);
-        DefaultNodeId nodeId = new DefaultNodeId(null, clientIpAddress, clientHostname, clientMessagingPort);
-        NodeAddress nodeInfo = new StaticNodeAddress(nodeId.toString(), clientIpAddress, clientHostname,
+        NodeAddress nodeInfo = new StaticNodeAddress(ReignClientUtil.getNodeId(null, clientIpAddress, clientHostname,
+                clientMessagingPort), clientIpAddress, clientHostname,
                 clientMessagingPort);
         return nodeInfo;
     }

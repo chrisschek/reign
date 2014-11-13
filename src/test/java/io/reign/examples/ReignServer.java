@@ -10,7 +10,7 @@ public class ReignServer {
 
     public static void main(String[] args) throws Exception {
         /** init and start reign using builder **/
-        Reign reign = Reign.maker().zkConnectString("localhost:2181").zkTestServerPort(22181).startZkTestServer(false)
+        Reign reign = Reign.maker().zkConnectString("localhost:22181").zkTestServerPort(22181).startZkTestServer(true)
                 .get();
         reign.start();
 

@@ -79,7 +79,11 @@ public class WebSocketMessagingProvider implements MessagingProvider {
     }
 
     String endpointUri(String hostOrIpAddress, int port) {
-        return "ws://" + hostOrIpAddress + ":" + port + WEBSOCKET_PATH;
+        if (hostOrIpAddress.contains(":")) {
+            return "ws://[" + hostOrIpAddress + "]:" + port + WEBSOCKET_PATH;
+        } else {
+            return "ws://" + hostOrIpAddress + ":" + port + WEBSOCKET_PATH;
+        }
     }
 
     @Override

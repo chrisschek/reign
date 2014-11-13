@@ -25,7 +25,7 @@ public class WebSocketConnectionManager {
     /**
      * How often to ping and check that a connection is still open
      */
-    private long connectionTimeout = 10000;
+    private long connectionTimeout = 5000;
 
     public ExecutorService getRequestMonitoringExecutor() {
         return requestMonitoringExecutor;
@@ -66,27 +66,33 @@ public class WebSocketConnectionManager {
             public void run() {
                 while (!shutdown) {
                     for (String key : clientMap.keySet()) {
-                        WebSocketClient client = clientMap.get(key);
+                        try {
+                            WebSocketClient client = clientMap.get(key);
 
-                        if (!client.isClosed()) {
-                            logger.debug("Sending PING:  remote={}", key);
-                            client.ping();
-                        } else {
-                            logger.info("Connection has been closed:  remote={}", key);
+                            if (!client.isClosed()) {
+                                logger.debug("Sending PING:  remote={}", key);
+                                client.ping();
+                            } else {
+                                logger.info("Connection has been closed:  remote={}", key);
 
-                            // remove from map if client closed
-                            logger.info("Removing connection:  remote={}", key);
-                            clientMap.remove(key);
+                                // remove from map if client closed
+                                logger.info("Removing connection:  remote={}", key);
+                                clientMap.remove(key);
 
-                            // remove presence node
-                            if (client.getClusterId() != null && client.getServiceId() != null
-                                    && client.getNodeId() != null) {
-                                logger.info(
-                                        "Removing presence node:  clusterId={}; serviceId={}; nodeId={}",
-                                        new Object[] { client.getClusterId(), client.getServiceId(), client.getNodeId() });
-                                PresenceService presenceService = reignContext.getService("presence");
-                                presenceService.dead(client.getClusterId(), client.getServiceId(), client.getNodeId());
+                                // remove presence node
+                                if (client.getClusterId() != null && client.getServiceId() != null
+                                        && client.getNodeId() != null) {
+                                    logger.info(
+                                            "Removing presence node:  clusterId={}; serviceId={}; nodeId={}",
+                                            new Object[] { client.getClusterId(), client.getServiceId(),
+                                                    client.getNodeId() });
+                                    PresenceService presenceService = reignContext.getService("presence");
+                                    presenceService.dead(client.getClusterId(), client.getServiceId(),
+                                            client.getNodeId());
+                                }
                             }
+                        } catch (Exception e) {
+                            logger.error("" + e, e);
                         }
                     }
 
@@ -108,12 +114,17 @@ public class WebSocketConnectionManager {
         });
         adminThread.setPriority(Thread.MIN_PRIORITY);
         adminThread.setDaemon(true);
-        adminThread.setName("Reign:" + this.getClass().getSimpleName() + ".adminThread");
+        adminThread.setName("Reign:" + this.getClass().getSimpleName() + ".connectionAdminThread");
         adminThread.start();
     }
 
     public void addClientConnection(String remoteAddress, int remotePort, WebSocketClient webSocketClient) {
-        String endpointUri = "ws://" + remoteAddress + ":" + remotePort + WebSocketMessagingProvider.WEBSOCKET_PATH;
+        String endpointUri = null;
+        if (remoteAddress.contains(":")) {
+            endpointUri = "ws://[" + remoteAddress + "]:" + remotePort + WebSocketMessagingProvider.WEBSOCKET_PATH;
+        } else {
+            endpointUri = "ws://" + remoteAddress + ":" + remotePort + WebSocketMessagingProvider.WEBSOCKET_PATH;
+        }
         logger.info("Adding connection:  remote={}", endpointUri);
         clientMap.put(endpointUri, webSocketClient);
     }

@@ -23,36 +23,36 @@ package io.reign;
  */
 public class StaticNodeAddress implements NodeAddress {
 
-	private final String nodeId;
-	private final String ipAddress;
-	private final String host;
-	private final Integer messagingPort;
+    private final String nodeId;
+    private final String ipAddress;
+    private final String host;
+    private final Integer messagingPort;
 
-	public StaticNodeAddress(String nodeId, String ipAddress, String host, Integer messagingPort) {
-		this.nodeId = nodeId;
-		this.ipAddress = ipAddress;
-		this.host = host;
-		this.messagingPort = messagingPort;
-	}
+    public StaticNodeAddress(String nodeId, String ipAddress, String host, Integer messagingPort) {
+        this.nodeId = nodeId;
+        this.ipAddress = ipAddress;
+        this.host = host;
+        this.messagingPort = messagingPort;
+    }
 
-	@Override
-	public String getNodeId() {
-		return nodeId;
-	}
+    // @Override
+    // public String getNodeId() {
+    // return nodeId;
+    // }
 
-	@Override
-	public String getIpAddress() {
-		return ipAddress;
-	}
+    @Override
+    public String getIpAddress() {
+        return ipAddress;
+    }
 
-	@Override
-	public String getHost() {
-		return host;
-	}
+    @Override
+    public String getHost() {
+        return host;
+    }
 
-	@Override
-	public Integer getMessagingPort() {
-		return messagingPort;
-	}
+    @Override
+    public Integer getMessagingPort() {
+        return messagingPort;
+    }
 
 }

@@ -31,6 +31,7 @@ import io.reign.mesg.SimpleEventMessage;
 import io.reign.mesg.SimpleResponseMessage;
 import io.reign.presence.PresenceService;
 import io.reign.util.JacksonUtil;
+import io.reign.util.ReignClientUtil;
 import io.reign.util.ZkClientUtil;
 
 import java.nio.charset.Charset;
@@ -566,7 +567,7 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
 
     }
 
-    MetricsObserver getClientObserver(final NodeAddress clientNodeInfo, final String clusterId, final String serviceId,
+    MetricsObserver getClientObserver(final NodeAddress nodeAddress, final String clusterId, final String serviceId,
             final String nodeId) {
         MetricsObserver observer = new MetricsObserver() {
             @Override
@@ -583,7 +584,7 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
 
                     MessagingService messagingService = getContext().getService("mesg");
                     messagingService.sendMessageFF(getContext().getPathScheme().getFrameworkClusterId(),
-                            Reign.CLIENT_SERVICE_ID, clientNodeInfo, eventMessage);
+                            Reign.CLIENT_SERVICE_ID, nodeAddress, eventMessage);
                 } catch (Exception e) {
                     logger.warn("Trouble notifying client observer:  " + e, e);
                 }
@@ -591,7 +592,8 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
             }
         };
 
-        observer.setOwnerId(clientNodeInfo.getNodeId());
+        observer.setOwnerId(ReignClientUtil.getNodeId(null, nodeAddress.getIpAddress(), nodeAddress.getHost(),
+                nodeAddress.getMessagingPort()));
 
         return observer;
     }

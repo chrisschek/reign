@@ -23,6 +23,8 @@ package io.reign;
  */
 public interface NodeInfo extends NodeAddress {
 
-	public String getProcessId();
+    public String getProcessId();
+
+    public String getNodeId();
 
 }
