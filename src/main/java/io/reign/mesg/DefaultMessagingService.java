@@ -478,8 +478,9 @@ public class DefaultMessagingService extends AbstractService implements Messagin
         String key = clusterId + "/" + serviceId;
         ServiceInfo serviceInfo = this.serviceInfoMap.get(key);
         if (serviceInfo == null) {
-            ServiceInfo newServiceInfo = getContext().presence().autoUpdate(true)
-                    .serviceInfo(clusterId, serviceId);
+            ServiceInfo newServiceInfo = getContext().presence().autoUpdate(true).cluster(clusterId)
+                    .service(serviceId)
+                    .serviceInfo();
             serviceInfo = this.serviceInfoMap.putIfAbsent(key, newServiceInfo);
             if (serviceInfo != null) {
                 ((UpdatingServiceInfo) newServiceInfo).destroy();
