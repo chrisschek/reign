@@ -153,6 +153,8 @@ public class WebSocketMessagingProvider implements MessagingProvider {
         logger.info("STOP:  shutting down websockets server");
         server.stop();
 
+        connectionManager.shutdown();
+
         this.shutdown = true;
     }
 
