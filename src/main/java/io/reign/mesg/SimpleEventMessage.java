@@ -8,13 +8,13 @@ import org.codehaus.jackson.annotate.JsonPropertyOrder;
  * 
  */
 @JsonPropertyOrder({ "event", "clusterId", "serviceId", "nodeId", "body" })
-public class SimpleEventMessage implements EventMessage {
+public class SimpleEventMessage<T> implements EventMessage<T> {
 
     private String event = null;
     private String clusterId = null;
     private String serviceId = null;
     private String nodeId = null;
-    private Object body = null;
+    private T body = null;
 
     @Override
     public String getEvent() {
@@ -37,18 +37,18 @@ public class SimpleEventMessage implements EventMessage {
     }
 
     @Override
-    public Object getBody() {
+    public T getBody() {
         return body;
     }
 
     @Override
-    public EventMessage setEvent(String event) {
+    public EventMessage<T> setEvent(String event) {
         this.event = event;
         return this;
     }
 
     @Override
-    public EventMessage setClusterId(String clusterId) {
+    public EventMessage<T> setClusterId(String clusterId) {
         this.clusterId = clusterId;
         return this;
     }
@@ -66,7 +66,7 @@ public class SimpleEventMessage implements EventMessage {
     }
 
     @Override
-    public EventMessage setBody(Object body) {
+    public EventMessage<T> setBody(T body) {
         this.body = body;
         return this;
     }
