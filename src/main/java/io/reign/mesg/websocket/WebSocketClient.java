@@ -252,6 +252,14 @@ public class WebSocketClient {
             handler.registerCallback(channel, requestId, callback);
         }
 
+        if (logger.isDebugEnabled()) {
+            try {
+                logger.debug("notWrapped={}; wrapped={}", bytes.length);
+            } catch (Exception e1) {
+                logger.error(e1 + "", e1);
+            }
+        }
+
         // write as final fragment
         // BinaryWebSocketFrame(boolean finalFragment, int rsv, ChannelBuffer binaryData)
         final ChannelFuture channelFuture = channel.write(new BinaryWebSocketFrame(true, 0, ChannelBuffers
