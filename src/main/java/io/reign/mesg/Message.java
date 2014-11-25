@@ -5,14 +5,14 @@ package io.reign.mesg;
  * @author ypai
  * 
  */
-public interface Message {
+public interface Message<T> {
 
     public Integer getId();
 
-    public Message setId(Integer id);
+    public Message<T> setId(Integer id);
 
-    public Object getBody();
+    public T getBody();
 
-    public Message setBody(Object body);
+    public Message<T> setBody(T body);
 
 }
