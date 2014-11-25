@@ -1,6 +1,8 @@
 Reign Framework
 ===============
-A framework for building distributed applications, leveraging open source projects such as [Apache ZooKeeper](http://zookeeper.apache.org/), [Netty](http://netty.io/), [Codahale Metrics](http://metrics.codahale.com/).
+A lightweight framework for building distributed applications, leveraging open source projects such as [Apache ZooKeeper](http://zookeeper.apache.org/), [Apache Curator](http://curator.apache.org/), [Netty](http://netty.io/), [Codahale Metrics](http://metrics.codahale.com/).
+
+Reign aims to provide the means to apply patterns common to many distributed applications:  node/service discovery, shared state and configuration management, partitioning for divide/conquer and scatter/gather patterns, supervisor/worker patterns, etc.  
 
 The Reign Framework is licensed under the Apache License, Version 2.0.  Specific details are available in LICENSE.txt.
 
@@ -9,22 +11,22 @@ Features
 --------
 
 Out of the box, the framework provides the following:
-* Service presence - monitor for nodes coming up and going down in services:  can be used to create smart clients that can detect when service nodes are up and down and shift requests elsewhere, etc.
-* Messaging - nodes can message each other directly and/or broadcast a message to member nodes of a specific service.
-* Constructs for distributed coordination - read/write locks, exclusive locks, semaphores, and barriers (coming soon).
-* Reign integrates with Codahale Metrics to allow services in a distributed application to publish data to each other via ZooKeeper.
-* Reliable ZooKeeper client wrapper that handles common ZooKeeper connection/session errors and re-connects as necessary.
+* Node presence - monitor for nodes coming up and going down within services:  can be used to create smart clients that can detect when service nodes are up and down and shift requests elsewhere, etc.
 * Support for management and storage of application configuration in ZooKeeper:  ideal for feature toggles, etc.
+* Constructs for distributed coordination based on lease pools.
+* Lightweight integration with [Codahale Metrics](http://metrics.codahale.com/) allows services to collect, aggregate, and publish metrics to a provided dashboard.
+* Messaging - nodes can message each other directly and/or broadcast a message to member nodes of a specific service.
+* Reliable ZooKeeper client wrapper that handles common ZooKeeper connection/session errors and re-connects as necessary.  [Apache Curator](http://curator.apache.org/)-based client would be a welcome addition!
+* A handy, real-time dashboard to monitor and configure your application services and collected metrics. 
 * A standardized way of organizing information in ZooKeeper for ease of maintenance and consistency between deployments.
-* ZooKeeper-based Maps, Queues, Stacks, Lists to support common patterns such as queue/worker pool; sharing common state between nodes.
 
 Common use cases:
 * Zero configuration applications - deploy to different environments or change application properties without needing to edit configuration files or restart services.  Edit configuration in one place and push changes out to many nodes at once. 
 * Dynamic service discovery - nodes in one service can discover nodes in other services without configuration changes. 
 * Service redundancy - for services where only one process/node can run at the same time, a stand-by process/node can be brought up and will automatically take over if the currently running process/node fails.
 * Capacity monitoring - services can monitor each other and ensure that they do not overwhelm each other:  for example, a frontline service may slow down its rate of requests to a backend service to prevent a "domino effect" where a spike in traffic brings down the whole application. 
-* Coordination and division of labor between nodes using locks, queues, or some combination thereof.
-* Application logic based on service states - services can share data via ZooKeeper:  for example, nodes in one service may go into "safety mode" based on information provided by another service (error rates, etc.).
+* Coordination and division of labor between nodes via partitioning.
+* Application logic based on service states and metrics:  for example, nodes in one service may go into "safety mode" based on information provided by another service (error rates, etc.).
   
 Applications using Reign quickly gain a high level of cluster-awareness and coordination capabilities.
 
