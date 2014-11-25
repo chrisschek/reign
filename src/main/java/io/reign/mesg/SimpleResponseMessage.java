@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @JsonPropertyOrder({ "id", "status" })
-public class SimpleResponseMessage extends AbstractMessage implements ResponseMessage {
+public class SimpleResponseMessage<T> extends AbstractMessage<T> implements ResponseMessage<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleResponseMessage.class);
 
@@ -32,18 +32,18 @@ public class SimpleResponseMessage extends AbstractMessage implements ResponseMe
         setId(id);
     }
 
-    public SimpleResponseMessage(ResponseStatus status, Object body) {
+    public SimpleResponseMessage(ResponseStatus status, T body) {
         setStatus(status);
         setBody(body);
     }
 
-    public SimpleResponseMessage(ResponseStatus status, Object body, String comment) {
+    public SimpleResponseMessage(ResponseStatus status, T body, String comment) {
         setStatus(status);
         setBody(body);
         setComment(comment);
     }
 
-    public SimpleResponseMessage(ResponseStatus status, Integer id, Object body, String comment) {
+    public SimpleResponseMessage(ResponseStatus status, Integer id, T body, String comment) {
         setStatus(status);
         setId(id);
         setBody(body);
@@ -72,7 +72,7 @@ public class SimpleResponseMessage extends AbstractMessage implements ResponseMe
     }
 
     @Override
-    public ResponseMessage setStatus(ResponseStatus status, String comment) {
+    public ResponseMessage<T> setStatus(ResponseStatus status, String comment) {
         this.status = status;
         this.comment = comment;
         return this;

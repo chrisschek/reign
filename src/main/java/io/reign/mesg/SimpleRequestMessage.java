@@ -11,53 +11,53 @@ import org.slf4j.LoggerFactory;
  * @author ypai
  * 
  */
-public class SimpleRequestMessage extends AbstractMessage implements RequestMessage {
+public class SimpleRequestMessage<T> extends AbstractMessage<T> implements RequestMessage<T> {
 
-	private static final Logger logger = LoggerFactory.getLogger(SimpleRequestMessage.class);
+    private static final Logger logger = LoggerFactory.getLogger(SimpleRequestMessage.class);
 
-	private String targetService;
+    private String targetService;
 
-	private NodeAddress senderInfo;
+    private NodeAddress senderInfo;
 
-	public SimpleRequestMessage() {
+    public SimpleRequestMessage() {
 
-	}
+    }
 
-	public SimpleRequestMessage(String targetService, Object body) {
-		setTargetService(targetService);
-		setBody(body);
-	}
+    public SimpleRequestMessage(String targetService, T body) {
+        setTargetService(targetService);
+        setBody(body);
+    }
 
-	@Override
-	public NodeAddress getSenderInfo() {
-		return senderInfo;
-	}
+    @Override
+    public NodeAddress getSenderInfo() {
+        return senderInfo;
+    }
 
-	@Override
-	public RequestMessage setSenderInfo(NodeAddress senderInfo) {
-		this.senderInfo = senderInfo;
-		return this;
-	}
+    @Override
+    public RequestMessage<T> setSenderInfo(NodeAddress senderInfo) {
+        this.senderInfo = senderInfo;
+        return this;
+    }
 
-	@Override
-	public String getTargetService() {
-		return targetService;
-	}
+    @Override
+    public String getTargetService() {
+        return targetService;
+    }
 
-	@Override
-	public RequestMessage setTargetService(String targetService) {
-		this.targetService = targetService;
-		return this;
-	}
+    @Override
+    public RequestMessage<T> setTargetService(String targetService) {
+        this.targetService = targetService;
+        return this;
+    }
 
-	@Override
-	public String toString() {
-		try {
-			return JacksonUtil.getObjectMapper().writeValueAsString(this);
-		} catch (Exception e) {
-			logger.error("" + e, e);
-			return super.toString();
-		}
-	}
+    @Override
+    public String toString() {
+        try {
+            return JacksonUtil.getObjectMapper().writeValueAsString(this);
+        } catch (Exception e) {
+            logger.error("" + e, e);
+            return super.toString();
+        }
+    }
 
 }
