@@ -5,7 +5,7 @@ package io.reign.mesg;
  * @author ypai
  * 
  */
-public interface EventMessage {
+public interface EventMessage<T> {
 
     public String getEvent();
 
@@ -15,16 +15,16 @@ public interface EventMessage {
 
     public String getNodeId();
 
-    public Object getBody();
+    public T getBody();
 
-    public EventMessage setEvent(String event);
+    public EventMessage<T> setEvent(String event);
 
-    public EventMessage setClusterId(String clusterId);
+    public EventMessage<T> setClusterId(String clusterId);
 
-    public EventMessage setServiceId(String serviceId);
+    public EventMessage<T> setServiceId(String serviceId);
 
-    public EventMessage setNodeId(String nodeId);
+    public EventMessage<T> setNodeId(String nodeId);
 
-    public EventMessage setBody(Object body);
+    public EventMessage<T> setBody(T body);
 
 }
