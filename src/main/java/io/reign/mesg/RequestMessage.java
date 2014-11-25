@@ -7,16 +7,16 @@ import io.reign.NodeAddress;
  * @author ypai
  * 
  */
-public interface RequestMessage extends Message {
+public interface RequestMessage<T> extends Message<T> {
 
-	public String getTargetService();
+    public String getTargetService();
 
-	public RequestMessage setTargetService(String targetService);
+    public RequestMessage<T> setTargetService(String targetService);
 
-	/**
-	 * @return the sender of the request
-	 */
-	public NodeAddress getSenderInfo();
+    /**
+     * @return the sender of the request
+     */
+    public NodeAddress getSenderInfo();
 
-	public RequestMessage setSenderInfo(NodeAddress senderInfo);
+    public RequestMessage<T> setSenderInfo(NodeAddress senderInfo);
 }
