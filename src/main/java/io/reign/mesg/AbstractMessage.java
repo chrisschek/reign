@@ -16,17 +16,16 @@
 
 package io.reign.mesg;
 
-
 /**
  * 
  * @author ypai
  * 
  */
-public abstract class AbstractMessage implements Message {
+public abstract class AbstractMessage<T> implements Message<T> {
 
     private Integer id = null;
 
-    private Object body;
+    private T body;
 
     @Override
     public Integer getId() {
@@ -40,12 +39,12 @@ public abstract class AbstractMessage implements Message {
     }
 
     @Override
-    public Object getBody() {
+    public T getBody() {
         return body;
     }
 
     @Override
-    public Message setBody(Object body) {
+    public Message<T> setBody(T body) {
         this.body = body;
         return this;
     }
