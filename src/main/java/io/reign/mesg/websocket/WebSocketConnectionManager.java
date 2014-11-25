@@ -105,10 +105,16 @@ public class WebSocketConnectionManager {
 
                 logger.info("STOP:  closing client connections");
                 for (String key : clientMap.keySet()) {
-                    WebSocketClient client = clientMap.get(key);
+                    try {
+                        WebSocketClient client = clientMap.get(key);
 
-                    logger.info("STOP:  closing client connection:  remote={}", key);
-                    client.close();
+                        logger.info("STOP:  closing client connection:  remote={}", key);
+                        if (client != null) {
+                            client.close();
+                        }
+                    } catch (Exception e) {
+                        logger.error("" + e, e);
+                    }
                 }
             }
         });
