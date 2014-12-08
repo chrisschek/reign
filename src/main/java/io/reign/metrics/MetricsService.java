@@ -26,8 +26,6 @@ public interface MetricsService extends Service {
 
     public void observe(final String clusterId, final String serviceId, MetricsObserver observer);
 
-    // public MetricRegistryManager getRegistered(String clusterId, String serviceId);
-
     /**
      * Registers metrics for export to ZK.
      */
