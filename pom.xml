@@ -42,6 +42,13 @@
 
 	<dependencies>
 
+        <!-- reactive Java extensions -->
+		<dependency>
+		    <groupId>io.reactivex</groupId>
+		    <artifactId>rxjava</artifactId>
+		    <version>1.0.1</version>
+		</dependency>
+
 		<!-- codahale metrics -->
 		<dependency>
 			<groupId>com.codahale.metrics</groupId>
