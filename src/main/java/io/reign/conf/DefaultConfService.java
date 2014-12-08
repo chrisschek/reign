@@ -16,7 +16,9 @@ package io.reign.conf;
 import io.reign.AbstractService;
 import io.reign.DataSerializer;
 import io.reign.JsonDataSerializer;
+import io.reign.PathScheme;
 import io.reign.PathType;
+import io.reign.ZkClient;
 import io.reign.mesg.ParsedRequestMessage;
 import io.reign.mesg.RequestMessage;
 import io.reign.mesg.ResponseMessage;
@@ -214,6 +216,18 @@ public class DefaultConfService extends AbstractService implements ConfService {
         } catch (Exception e) {
             logger.error("removeConf():  error trying to delete node:  " + e + ":  path=" + path, e);
         }
+    }
+
+    private ZkClient getZkClient() {
+        return getContext().getZkClient();
+    }
+
+    private PathScheme getPathScheme() {
+        return getContext().getPathScheme();
+    }
+
+    public List<ACL> getDefaultZkAclList() {
+        return getContext().getDefaultZkAclList();
     }
 
     /**
