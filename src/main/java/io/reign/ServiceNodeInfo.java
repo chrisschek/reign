@@ -8,12 +8,14 @@ import java.util.Map;
  *
  */
 public interface ServiceNodeInfo extends NodeInfo {
-	public Object getAttribute(String key);
+    public Object getAttribute(String key);
 
-	public Map<String, String> getAttributeMap();
+    public Map<String, String> getAttributeMap();
 
-	public String getClusterId();
+    public String getClusterId();
 
-	public String getServiceId();
+    public String getServiceId();
+
+    public Integer getPort();
 
 }
