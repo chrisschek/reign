@@ -104,23 +104,10 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
 
     @Override
     public void observe(final String clusterId, final String serviceId, MetricsObserver observer) {
-        String servicePath = getPathScheme().joinTokens(clusterId, serviceId);
-        String path = getPathScheme().getAbsolutePath(PathType.METRICS, servicePath);
+        String servicePath = getContext().getPathScheme().joinTokens(clusterId, serviceId);
+        String path = getContext().getPathScheme().getAbsolutePath(PathType.METRICS, servicePath);
         getObserverManager().put(path, observer);
     }
-
-    // @Override
-    // public MetricRegistryManager getRegistered(String clusterId, String serviceId) {
-    // String key = exportPathMapKey(clusterId, serviceId, getContext().getNodeId());
-    // synchronized (exportPathMap) {
-    // ExportMeta exportMeta = exportPathMap.get(key);
-    // if (exportMeta != null) {
-    // return exportMeta.registryManager;
-    // } else {
-    // return null;
-    // }
-    // }
-    // }
 
     /**
      * Registers metrics for export to ZK.
@@ -479,7 +466,7 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
             /** get response **/
             if ("observe".equals(parsedRequestMessage.getMeta())) {
                 responseMessage = new SimpleResponseMessage(ResponseStatus.OK);
-                String[] tokens = getPathScheme().tokenizePath(resource);
+                String[] tokens = getContext().getPathScheme().tokenizePath(resource);
                 if (tokens.length == 2) {
                     this.observe(tokens[0], tokens[1],
                             this.getClientObserver(parsedRequestMessage.getSenderInfo(), tokens[0], tokens[1], null));
@@ -491,7 +478,7 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
                 }
             } else if ("observe-stop".equals(parsedRequestMessage.getMeta())) {
                 responseMessage = new SimpleResponseMessage(ResponseStatus.OK);
-                String absolutePath = getPathScheme().getAbsolutePath(PathType.METRICS, resource);
+                String absolutePath = getContext().getPathScheme().getAbsolutePath(PathType.METRICS, resource);
                 getContext().getObserverManager().removeByOwnerId(parsedRequestMessage.getSenderInfo().toString(),
                         absolutePath);
             } else {
@@ -502,7 +489,7 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
                     responseMessage.setBody(clusterList);
 
                 } else {
-                    String[] tokens = getPathScheme().tokenizePath(resource);
+                    String[] tokens = getContext().getPathScheme().tokenizePath(resource);
                     // logger.debug("tokens.length={}", tokens.length);
 
                     if (tokens.length == 1) {

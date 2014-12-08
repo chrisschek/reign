@@ -18,9 +18,11 @@ package io.reign.mesg;
 
 import io.reign.AbstractService;
 import io.reign.NodeAddress;
+import io.reign.PathScheme;
 import io.reign.Reign;
 import io.reign.ReignException;
 import io.reign.StaticNodeInfo;
+import io.reign.ZkClient;
 import io.reign.mesg.websocket.WebSocketMessagingProvider;
 import io.reign.presence.ServiceInfo;
 import io.reign.presence.UpdatingServiceInfo;
@@ -34,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.zookeeper.data.ACL;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.slf4j.Logger;
@@ -450,13 +453,17 @@ public class DefaultMessagingService extends AbstractService implements Messagin
 
     }
 
-    // public int getServiceInfoCacheTimeoutSeconds() {
-    // return serviceInfoCacheTimeoutSeconds;
-    // }
-    //
-    // public void setServiceInfoCacheTimeoutSeconds(int serviceInfoCacheTimeoutSeconds) {
-    // this.serviceInfoCacheTimeoutSeconds = serviceInfoCacheTimeoutSeconds;
-    // }
+    private ZkClient getZkClient() {
+        return getContext().getZkClient();
+    }
+
+    private PathScheme getPathScheme() {
+        return getContext().getPathScheme();
+    }
+
+    public List<ACL> getDefaultZkAclList() {
+        return getContext().getDefaultZkAclList();
+    }
 
     String hostOrIpAddress(String host, String ipAddress) {
         // prefer ip, then use hostname if not available
@@ -479,8 +486,7 @@ public class DefaultMessagingService extends AbstractService implements Messagin
         ServiceInfo serviceInfo = this.serviceInfoMap.get(key);
         if (serviceInfo == null) {
             ServiceInfo newServiceInfo = getContext().presence().autoUpdate(true).cluster(clusterId)
-                    .service(serviceId)
-                    .serviceInfo();
+                    .serviceInfo(serviceId);
             serviceInfo = this.serviceInfoMap.putIfAbsent(key, newServiceInfo);
             if (serviceInfo != null) {
                 ((UpdatingServiceInfo) newServiceInfo).destroy();
