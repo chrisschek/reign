@@ -18,11 +18,13 @@ import io.reign.DataSerializer;
 import io.reign.JsonDataSerializer;
 import io.reign.NodeAddress;
 import io.reign.NodeInfo;
+import io.reign.PathScheme;
 import io.reign.PathType;
 import io.reign.Reign;
 import io.reign.ReignException;
 import io.reign.ServiceNodeInfo;
 import io.reign.StaticServiceNodeInfo;
+import io.reign.ZkClient;
 import io.reign.coord.CoordinationService;
 import io.reign.coord.DistributedLock;
 import io.reign.mesg.MessagingService;
@@ -115,7 +117,7 @@ public class DefaultPresenceService extends AbstractService implements PresenceS
 
     @Override
     public boolean isMemberOf(String clusterId) {
-        String prefixToCheck = clusterId + getContext().getPathScheme().getPathTokenizer();
+        String prefixToCheck = clusterId + getContext().getPathScheme().getPathDelimiter();
         for (String key : announcementMap.keySet()) {
             if (key.startsWith(prefixToCheck)) {
                 return true;
@@ -126,7 +128,7 @@ public class DefaultPresenceService extends AbstractService implements PresenceS
 
     @Override
     public boolean isMemberOf(String clusterId, String serviceId) {
-        String nodePath = getPathScheme().joinTokens(clusterId, serviceId, getContext().getNodeId());
+        String nodePath = getContext().getPathScheme().joinTokens(clusterId, serviceId, getContext().getNodeId());
         Announcement announcement = this.getAnnouncement(nodePath, null);
         return announcement != null;
     }
@@ -134,19 +136,19 @@ public class DefaultPresenceService extends AbstractService implements PresenceS
     @Override
     public List<String> getClusters() {
         /** get node data from zk **/
-        String path = getPathScheme().getAbsolutePath(PathType.PRESENCE);
+        String path = getContext().getPathScheme().getAbsolutePath(PathType.PRESENCE);
         List<String> children = Collections.EMPTY_LIST;
         try {
             Stat stat = new Stat();
-            children = getZkClient().getChildren(path, true, stat);
+            children = getContext().getZkClient().getChildren(path, true, stat);
 
             // getPathCache().put(path, stat, null, children);
 
         } catch (KeeperException e) {
             if (e.code() == Code.NONODE) {
-                logger.warn("lookupClusters():  " + e + ":  node does not exist:  path={}", path);
+                logger.warn("getClusters():  " + e + ":  node does not exist:  path={}", path);
             } else {
-                logger.warn("lookupClusters():  " + e, e);
+                logger.warn("getClusters():  " + e, e);
             }
             return Collections.EMPTY_LIST;
         } catch (InterruptedException e) {
@@ -320,6 +322,18 @@ public class DefaultPresenceService extends AbstractService implements PresenceS
     @Override
     public ServiceInfo getServiceInfo(String clusterId, String serviceId, PresenceObserver<ServiceInfo> observer) {
         return getServiceInfo(clusterId, serviceId, observer, nodeAttributeSerializer);
+    }
+
+    private ZkClient getZkClient() {
+        return getContext().getZkClient();
+    }
+
+    private PathScheme getPathScheme() {
+        return getContext().getPathScheme();
+    }
+
+    public List<ACL> getDefaultZkAclList() {
+        return getContext().getDefaultZkAclList();
     }
 
     ServiceInfo getServiceInfo(String clusterId, String serviceId, PresenceObserver<ServiceInfo> observer,
