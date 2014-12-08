@@ -15,6 +15,9 @@
  */
 package io.reign.lease;
 
+import rx.Observable;
+import rx.Subscription;
+
 /**
  * 
  * @author ypai
@@ -22,16 +25,28 @@ package io.reign.lease;
  */
 public interface Lease {
 
-    public String getId();
+    public String holderId();
 
-    public long getExpiryMillis();
+    public String clusterId();
 
-    public long getTimeToExpiry();
+    public String poolId();
 
-    public boolean isExpired();
+    public String id();
 
-    public void renew();
+    public long durationMillis();
 
-    public void relinquish();
+    public long acquiredTimestamp();
+
+    public long expiryTimestamp();
+
+    public boolean expired();
+
+    public Observable<LeaseEvent> renew();
+
+    public Observable<LeaseEvent> release();
+
+    public Subscription renew(LeaseEventSubscriber subscriber);
+
+    public Subscription release(LeaseEventSubscriber subscriber);
 
 }

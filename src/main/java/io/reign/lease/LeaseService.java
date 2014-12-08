@@ -17,8 +17,7 @@
 package io.reign.lease;
 
 import io.reign.Service;
-
-import java.util.concurrent.TimeUnit;
+import rx.Observable;
 
 /**
  * 
@@ -27,10 +26,18 @@ import java.util.concurrent.TimeUnit;
  */
 public interface LeaseService extends Service {
 
-	public void request(String clusterId, String leaseId, int poolSize, long leaseDuration, TimeUnit leaseDurationUnit,
-	        LeaseObserver leaseObserver);
+    public Observable<LeaseEvent> tryAcquire(final String clusterId, final String poolId, final int poolSize,
+            final long durationMillis);
 
-	public void observe(String clusterId, String leaseId, int poolSize, long leaseDuration, TimeUnit leaseDurationUnit,
-	        LeaseObserver leaseObserver);
+    public Observable<LeaseEvent> acquire(String clusterId, String leasePoolId, int poolSize, long durationMillis);
+
+    public Observable<LeaseEvent> renew(String clusterId, String leasePoolId, int poolSize,
+            String leaseId);
+
+    public Observable<LeaseEvent> release(String clusterId, String leasePoolId, int poolSize,
+            String leaseId);
+
+    public Observable<LeaseEvent> revoke(String clusterId, String leasePoolId, int poolSize,
+            String leaseId);
 
 }
