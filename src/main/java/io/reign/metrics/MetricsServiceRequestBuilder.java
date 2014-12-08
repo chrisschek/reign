@@ -12,13 +12,13 @@ import com.codahale.metrics.MetricRegistry;
 public class MetricsServiceRequestBuilder {
 
     private String clusterId;
-    private String serviceId;
 
-    private long rotationInterval = 1;
-    private TimeUnit rotationIntervalTimeUnit = TimeUnit.HOURS;
+    private boolean rotateFrequencySet = false;
+    private long rotateFrequency = 1;
+    private TimeUnit rotateFrequencyTimeUnit = TimeUnit.HOURS;
 
-    private long persistInterval = 15;
-    private TimeUnit persistIntervalTimeUnit = TimeUnit.SECONDS;
+    private long persistFrequency = 15;
+    private TimeUnit persistFrequencyTimeUnit = TimeUnit.SECONDS;
 
     private MetricsService metricsService;
 
@@ -31,50 +31,51 @@ public class MetricsServiceRequestBuilder {
         return this;
     }
 
-    public MetricsServiceRequestBuilder service(String serviceId) {
-        this.serviceId = serviceId;
-        return this;
-    }
-
     /**
-     * How often metrics for this node are rotated (to prevent overflows in high throughput situations)
+     * How often metrics for this node are rotated (to prevent overflows in high throughput situations and to be able to
+     * apply thresholds that alter application behavior: e.g. requests per hour, etc.)
      */
-    public MetricsServiceRequestBuilder rotationInterval(long rotationInterval, TimeUnit rotationIntervalTimeUnit) {
-        this.rotationInterval = rotationInterval;
-        this.rotationIntervalTimeUnit = rotationIntervalTimeUnit;
+    public MetricsServiceRequestBuilder rotateFrequency(long rotateFrequency, TimeUnit rotateFrequencyTimeUnit) {
+        this.rotateFrequency = rotateFrequency;
+        this.rotateFrequencyTimeUnit = rotateFrequencyTimeUnit;
+        this.rotateFrequencySet = true;
         return this;
     }
 
     /**
      * How often metrics for this node are persisted
      */
-    public MetricsServiceRequestBuilder persistInterval(long persistInterval, TimeUnit persistIntervalTimeUnit) {
-        this.persistInterval = persistInterval;
-        this.persistIntervalTimeUnit = persistIntervalTimeUnit;
+    public MetricsServiceRequestBuilder persistFrequency(long persistFrequency, TimeUnit persistFrequencyTimeUnit) {
+        this.persistFrequency = persistFrequency;
+        this.persistFrequencyTimeUnit = persistFrequencyTimeUnit;
         return this;
     }
 
-    public void observe(String clusterId, String serviceId, MetricsObserver observer) {
+    public void observe(String serviceId, MetricsObserver observer) {
         this.metricsService.observe(clusterId, serviceId, observer);
     }
 
-    public MetricsData serviceMetrics() {
+    public MetricsData serviceMetrics(String serviceId) {
         return this.metricsService.getServiceMetrics(clusterId, serviceId);
     }
 
-    public MetricsData nodeMetrics() {
+    public MetricsData nodeMetrics(String serviceId) {
         return this.metricsService.getNodeMetrics(clusterId, serviceId);
     }
 
-    public void scheduleExport(MetricRegistryManager registryManager) {
-        this.metricsService.scheduleExport(clusterId, serviceId, registryManager, persistInterval,
-                persistIntervalTimeUnit);
+    public void exportAs(String serviceId, MetricRegistryManager registryManager) {
+        if (rotateFrequencySet) {
+            throw new IllegalArgumentException(
+                    "rotateFrequency should NOT be specified when reporting with custom registryManager!");
+        }
+        this.metricsService.scheduleExport(clusterId, serviceId, registryManager, persistFrequency,
+                persistFrequencyTimeUnit);
     }
 
-    public MetricRegistryManager scheduleExport(MetricRegistry registry) {
-        MetricRegistryManager metricRegistryManager = new RotatingMetricRegistryManager(registry, rotationInterval,
-                rotationIntervalTimeUnit);
-        scheduleExport(metricRegistryManager);
+    public MetricRegistryManager exportAs(String serviceId, MetricRegistry registry) {
+        MetricRegistryManager metricRegistryManager = new RotatingMetricRegistryManager(registry, rotateFrequency,
+                rotateFrequencyTimeUnit);
+        exportAs(serviceId, metricRegistryManager);
         return metricRegistryManager;
     }
 
