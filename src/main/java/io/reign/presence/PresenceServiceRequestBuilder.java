@@ -8,12 +8,10 @@ public class PresenceServiceRequestBuilder {
 
     private PresenceService presenceService;
     private String clusterId;
-    private String serviceId;
-    private String nodeId;
     private boolean autoUpdate = false;
 
     public PresenceServiceRequestBuilder(PresenceService presenceService) {
-
+        this.presenceService = presenceService;
     }
 
     public PresenceServiceRequestBuilder autoUpdate(boolean autoUpdate) {
@@ -26,21 +24,11 @@ public class PresenceServiceRequestBuilder {
         return this;
     }
 
-    public PresenceServiceRequestBuilder service(String serviceId) {
-        this.serviceId = serviceId;
-        return this;
-    }
-
-    public PresenceServiceRequestBuilder node(String nodeId) {
-        this.nodeId = nodeId;
-        return this;
-    }
-
-    public void await() {
+    public void await(String serviceId) {
         presenceService.waitUntilAvailable(clusterId, serviceId, -1);
     }
 
-    public void await(long timeoutMillis) {
+    public void await(String serviceId, long timeoutMillis) {
         presenceService.waitUntilAvailable(clusterId, serviceId, timeoutMillis);
     }
 
@@ -52,23 +40,33 @@ public class PresenceServiceRequestBuilder {
         return presenceService.getServices(clusterId);
     }
 
-    public void show() {
+    public void show(String serviceId) {
         presenceService.show(clusterId, serviceId);
     }
 
-    public void hide() {
+    public void hide(String serviceId) {
         presenceService.hide(clusterId, serviceId);
     }
 
-    public void dead() {
-        if (nodeId == null) {
-            presenceService.dead(clusterId, serviceId);
+    public void dead(String serviceId) {
+        presenceService.dead(clusterId, serviceId);
+    }
+
+    public void dead(String serviceId, String nodeId) {
+        presenceService.dead(clusterId, serviceId, nodeId);
+    }
+
+    public boolean memberOf(String clusterOrServiceId) {
+        if (clusterId == null) {
+            // interpret as clusterId
+            return presenceService.isMemberOf(clusterOrServiceId);
         } else {
-            presenceService.dead(clusterId, serviceId, nodeId);
+            // interpret as serviceId
+            return presenceService.isMemberOf(clusterId, clusterOrServiceId);
         }
     }
 
-    public ServiceInfo serviceInfo() {
+    public ServiceInfo serviceInfo(String serviceId) {
         if (!autoUpdate) {
             return presenceService.getServiceInfo(clusterId, serviceId);
         } else {
@@ -77,7 +75,7 @@ public class PresenceServiceRequestBuilder {
         }
     }
 
-    public ServiceNodeInfo nodeInfo() {
+    public ServiceNodeInfo nodeInfo(String serviceId, String nodeId) {
         if (!autoUpdate) {
             return presenceService.getNodeInfo(clusterId, serviceId, nodeId);
         } else {
