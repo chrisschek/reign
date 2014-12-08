@@ -17,6 +17,8 @@ import io.reign.conf.ConfService;
 import io.reign.conf.DefaultConfService;
 import io.reign.coord.CoordinationService;
 import io.reign.data.DataService;
+import io.reign.lease.DefaultLeaseService;
+import io.reign.lease.LeaseService;
 import io.reign.mesg.DefaultMessagingService;
 import io.reign.mesg.MessagingService;
 import io.reign.metrics.DefaultMetricsService;
@@ -113,13 +115,15 @@ public class ReignMaker {
 
         coord();
 
-        data();
+        lease();
 
         mesg();
 
         metrics();
 
         nullService();
+
+        data();
 
         return this;
     }
@@ -135,9 +139,6 @@ public class ReignMaker {
         PresenceService presenceService = new DefaultPresenceService();
         serviceMap.put("presence", presenceService);
 
-        // alternate route for more concise messaging
-        serviceMap.put("P", presenceService);
-
         return this;
     }
 
@@ -152,18 +153,12 @@ public class ReignMaker {
         ConfService confService = new DefaultConfService();
         serviceMap.put("conf", confService);
 
-        // alternate route for more concise messaging
-        serviceMap.put("F", confService);
-
         return this;
     }
 
     private ReignMaker coord() {
         CoordinationService coordService = new CoordinationService();
         serviceMap.put("coord", coordService);
-
-        // alternate route for more concise messaging
-        serviceMap.put("C", coordService);
 
         return this;
     }
@@ -172,8 +167,12 @@ public class ReignMaker {
         DataService dataService = new DataService();
         serviceMap.put("data", dataService);
 
-        // alternate route for more concise messaging
-        serviceMap.put("D", dataService);
+        return this;
+    }
+
+    private ReignMaker lease() {
+        LeaseService leaseService = new DefaultLeaseService();
+        serviceMap.put("lease", leaseService);
 
         return this;
     }
@@ -195,9 +194,6 @@ public class ReignMaker {
         }
 
         logger.info("Configuring messaging service:  port={}", messagingPort);
-
-        // alternate route for more concise messaging
-        serviceMap.put("M", messagingService);
 
         return this;
     }
@@ -360,8 +356,8 @@ public class ReignMaker {
         // build
         s = new Reign(zkClient, pathScheme, canonicalIdMaker, zkTestServer);
         s.registerServices(serviceMap);
-        s.setStartHook(startHook);
-        s.setStopHook(stopHook);
+        s.onStart(startHook);
+        s.onStop(stopHook);
 
         return s;
     }
