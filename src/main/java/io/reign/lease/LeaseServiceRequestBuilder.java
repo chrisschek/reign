@@ -1,6 +1,7 @@
 package io.reign.lease;
 
-import java.util.concurrent.TimeUnit;
+import rx.Observable;
+import rx.Subscription;
 
 /**
  * 
@@ -10,17 +11,12 @@ import java.util.concurrent.TimeUnit;
 public class LeaseServiceRequestBuilder {
 
     public static final int DEFAULT_LEASE_POOL_SIZE = 1;
-    public static final long DEFAULT_LEASE_DURATION = 60;
-    public static final TimeUnit DEFAULT_LEASE_DURATION_UNIT = TimeUnit.SECONDS;
 
     private String clusterId;
-    private String leaseId;
-
-    private long leaseDuration = DEFAULT_LEASE_DURATION;
-    private TimeUnit leaseDurationUnit = DEFAULT_LEASE_DURATION_UNIT;
+    private String poolId;
+    private int poolSize;
 
     private LeaseService leaseService;
-    private int poolSize = DEFAULT_LEASE_POOL_SIZE;
 
     public LeaseServiceRequestBuilder(LeaseService leaseService) {
         this.leaseService = leaseService;
@@ -31,27 +27,50 @@ public class LeaseServiceRequestBuilder {
         return this;
     }
 
-    public LeaseServiceRequestBuilder leaseId(String leaseId) {
-        this.leaseId = leaseId;
-        return this;
-    }
-
-    public LeaseServiceRequestBuilder duration(int leaseDuration, TimeUnit leaseDurationUnit) {
-        this.leaseDuration = leaseDuration;
-        this.leaseDurationUnit = leaseDurationUnit;
-        return this;
-    }
-
-    public LeaseServiceRequestBuilder poolSize(int poolSize) {
+    public LeaseServiceRequestBuilder pool(String poolId, int poolSize) {
+        this.poolId = poolId;
         this.poolSize = poolSize;
         return this;
     }
 
-    public void request(LeaseObserver leaseObserver) {
-        leaseService.request(clusterId, leaseId, poolSize, leaseDuration, leaseDurationUnit, leaseObserver);
+    public Subscription tryAcquire(long durationMillis, LeaseEventSubscriber subscriber) {
+        return leaseService.tryAcquire(clusterId, poolId, poolSize, durationMillis).subscribe(subscriber);
     }
 
-    public void observe(LeaseObserver leaseObserver) {
-        leaseService.observe(clusterId, leaseId, poolSize, leaseDuration, leaseDurationUnit, leaseObserver);
+    public Subscription acquire(long durationMillis, LeaseEventSubscriber subscriber) {
+        return leaseService.acquire(clusterId, poolId, poolSize, durationMillis).subscribe(subscriber);
     }
+
+    public Subscription renew(String leaseId, LeaseEventSubscriber subscriber) {
+        return leaseService.renew(clusterId, poolId, poolSize, leaseId).subscribe(subscriber);
+    }
+
+    public Subscription release(String leaseId, LeaseEventSubscriber subscriber) {
+        return leaseService.release(clusterId, poolId, poolSize, leaseId).subscribe(subscriber);
+    }
+
+    public Subscription revoke(String leaseId, LeaseEventSubscriber subscriber) {
+        return leaseService.revoke(clusterId, poolId, poolSize, leaseId).subscribe(subscriber);
+    }
+
+    public Observable<LeaseEvent> tryAcquire(long durationMillis) {
+        return leaseService.tryAcquire(clusterId, poolId, poolSize, durationMillis);
+    }
+
+    public Observable<LeaseEvent> acquire(long durationMillis) {
+        return leaseService.acquire(clusterId, poolId, poolSize, durationMillis);
+    }
+
+    public Observable<LeaseEvent> renew(String leaseId) {
+        return leaseService.renew(clusterId, poolId, poolSize, leaseId);
+    }
+
+    public Observable<LeaseEvent> release(String leaseId) {
+        return leaseService.release(clusterId, poolId, poolSize, leaseId);
+    }
+
+    public Observable<LeaseEvent> revoke(String leaseId) {
+        return leaseService.revoke(clusterId, poolId, poolSize, leaseId);
+    }
+
 }
