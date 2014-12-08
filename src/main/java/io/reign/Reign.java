@@ -67,14 +67,12 @@ public class Reign implements Watcher {
 
     private final Map<String, ServiceWrapper> serviceMap = new ConcurrentHashMap<String, ServiceWrapper>(8, 0.9f, 2);
 
-    private ReignContext context;
+    private volatile ReignContext context;
 
     private PathScheme pathScheme;
 
     private volatile boolean started = false;
     private volatile boolean shutdown = false;
-
-    private int threadPoolSize = 3;
 
     /** List to ensure Watcher(s) are called in a specific order */
     private final List<Watcher> watcherList = new ArrayList<Watcher>();
@@ -206,17 +204,6 @@ public class Reign implements Watcher {
             throw new IllegalStateException("Cannot set pathScheme once started!");
         }
         this.pathScheme = pathScheme;
-    }
-
-    public int getThreadPoolSize() {
-        return threadPoolSize;
-    }
-
-    public void setThreadPoolSize(int threadPoolSize) {
-        if (started) {
-            throw new IllegalStateException("Cannot set threadPoolSize once started!");
-        }
-        this.threadPoolSize = threadPoolSize;
     }
 
     public <T extends Service> T getService(String serviceName) {
@@ -363,11 +350,11 @@ public class Reign implements Watcher {
             logger.info("START:  initializing:  serviceName={}", serviceName);
 
             Service service = serviceMap.get(serviceName).getService();
-            service.setPathScheme(pathScheme);
-            service.setZkClient(zkClient);
+            // service.setPathScheme(pathScheme);
+            // service.setZkClient(zkClient);
             service.setObserverManager(observerManager);
             service.setContext(context);
-            service.setDefaultZkAclList(defaultZkAclList);
+            // service.setDefaultZkAclList(defaultZkAclList);
             service.init();
 
             // add to zkClient's list of watchers if Watcher interface is
@@ -479,7 +466,9 @@ public class Reign implements Watcher {
             try {
                 while (!started) {
                     logger.info("Waiting for notification of start() completion...");
-                    Reign.this.wait(60000);
+                    synchronized (this) {
+                        this.wait(60000);
+                    }
                 }
             } catch (InterruptedException e) {
                 logger.warn("Interrupted while waiting for start:  " + e, e);
