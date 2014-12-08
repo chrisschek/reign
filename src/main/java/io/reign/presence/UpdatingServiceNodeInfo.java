@@ -29,96 +29,108 @@ import java.util.Map;
  */
 public class UpdatingServiceNodeInfo implements ServiceNodeInfo {
 
-	private volatile ServiceNodeInfo nodeInfo;
-	private final String clusterId;
-	private final String serviceId;
-	private final String nodeId;
-	private final ReignContext context;
-	private final PresenceObserver<ServiceNodeInfo> observer;
+    private volatile ServiceNodeInfo nodeInfo;
+    private final String clusterId;
+    private final String serviceId;
+    private final String nodeId;
+    private final ReignContext context;
+    private final PresenceObserver<ServiceNodeInfo> observer;
 
-	public UpdatingServiceNodeInfo(String clusterId, String serviceId, String nodeId, ReignContext context) {
-		if (clusterId == null && serviceId == null && nodeId == null) {
-			throw new IllegalArgumentException("clusterId, serviceId, nodeId cannot be null!");
-		}
+    public UpdatingServiceNodeInfo(String clusterId, String serviceId, String nodeId, ReignContext context) {
+        if (clusterId == null && serviceId == null && nodeId == null) {
+            throw new IllegalArgumentException("clusterId, serviceId, nodeId cannot be null!");
+        }
 
-		this.clusterId = clusterId;
-		this.serviceId = serviceId;
-		this.nodeId = nodeId;
+        this.clusterId = clusterId;
+        this.serviceId = serviceId;
+        this.nodeId = nodeId;
 
-		this.context = context;
-		this.observer = new PresenceObserver<ServiceNodeInfo>() {
-			@Override
-			public void updated(ServiceNodeInfo updated, ServiceNodeInfo previous) {
-				nodeInfo = updated;
-			}
-		};
+        this.context = context;
+        this.observer = new PresenceObserver<ServiceNodeInfo>() {
+            @Override
+            public void updated(ServiceNodeInfo updated, ServiceNodeInfo previous) {
+                nodeInfo = updated;
+            }
+        };
 
-		PresenceService presenceService = context.getService("presence");
-		nodeInfo = presenceService.getNodeInfo(clusterId, serviceId, nodeId, observer);
-	}
+        PresenceService presenceService = context.getService("presence");
+        nodeInfo = presenceService.getNodeInfo(clusterId, serviceId, nodeId, observer);
+    }
 
-	public void destroy() {
-		String path = context.getPathScheme().getAbsolutePath(PathType.PRESENCE, clusterId, serviceId, nodeId);
-		context.getObserverManager().remove(path, observer);
-	}
+    public void destroy() {
+        String path = context.getPathScheme().getAbsolutePath(PathType.PRESENCE, clusterId, serviceId, nodeId);
+        context.getObserverManager().remove(path, observer);
+    }
 
-	public Object getAttribute(String key) {
-		if (nodeInfo == null) {
-			return null;
-		}
-		return nodeInfo.getAttribute(key);
-	}
+    @Override
+    public Object getAttribute(String key) {
+        if (nodeInfo == null) {
+            return null;
+        }
+        return nodeInfo.getAttribute(key);
+    }
 
-	public Map<String, String> getAttributeMap() {
-		if (nodeInfo == null) {
-			return null;
-		}
-		return nodeInfo.getAttributeMap();
-	}
+    @Override
+    public Map<String, String> getAttributeMap() {
+        if (nodeInfo == null) {
+            return null;
+        }
+        return nodeInfo.getAttributeMap();
+    }
 
-	public String getClusterId() {
-		return clusterId;
-	}
+    @Override
+    public String getClusterId() {
+        return clusterId;
+    }
 
-	public String getServiceId() {
-		return serviceId;
-	}
+    @Override
+    public String getServiceId() {
+        return serviceId;
+    }
 
-	@Override
-	public String getNodeId() {
-		return nodeId;
-	}
+    @Override
+    public String getNodeId() {
+        return nodeId;
+    }
 
-	@Override
-	public String getProcessId() {
-		if (nodeInfo == null) {
-			return null;
-		}
-		return nodeInfo.getProcessId();
-	}
+    @Override
+    public String getProcessId() {
+        if (nodeInfo == null) {
+            return null;
+        }
+        return nodeInfo.getProcessId();
+    }
 
-	@Override
-	public String getIpAddress() {
-		if (nodeInfo == null) {
-			return null;
-		}
-		return nodeInfo.getIpAddress();
-	}
+    @Override
+    public String getIpAddress() {
+        if (nodeInfo == null) {
+            return null;
+        }
+        return nodeInfo.getIpAddress();
+    }
 
-	@Override
-	public String getHost() {
-		if (nodeInfo == null) {
-			return null;
-		}
-		return nodeInfo.getHost();
-	}
+    @Override
+    public String getHost() {
+        if (nodeInfo == null) {
+            return null;
+        }
+        return nodeInfo.getHost();
+    }
 
-	@Override
-	public Integer getMessagingPort() {
-		if (nodeInfo == null) {
-			return null;
-		}
-		return nodeInfo.getMessagingPort();
-	}
+    @Override
+    public Integer getPort() {
+        if (nodeInfo == null) {
+            return null;
+        }
+        return nodeInfo.getPort();
+    }
+
+    @Override
+    public Integer getMessagingPort() {
+        if (nodeInfo == null) {
+            return null;
+        }
+        return nodeInfo.getMessagingPort();
+    }
 
 }
