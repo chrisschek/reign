@@ -23,30 +23,34 @@ package io.reign;
  */
 public interface PathScheme {
 
-	public String getFrameworkBasePath();
+    public String getFrameworkBasePath();
 
-	public String getAbsolutePath(PathType pathType);
+    public String getAbsolutePath(PathType pathType);
 
-	public String getAbsolutePath(PathType pathType, String relativePath);
+    public String getAbsolutePath(PathType pathType, String relativePath);
 
-	public String getAbsolutePath(PathType pathType, String... pathTokens);
+    public String getAbsolutePath(PathType pathType, String... pathTokens);
 
-	public String joinPaths(String... paths);
+    public String joinPaths(String... paths);
 
-	public String[] tokenizePath(String path);
+    public String[] tokenizePath(String path);
 
-	public String joinTokens(String... pathTokens);
+    public String firstToken(String path);
 
-	public boolean isValidToken(String pathToken);
+    public String lastToken(String path);
 
-	public boolean isValidPath(String path);
+    public String joinTokens(String... pathTokens);
 
-	public String getFrameworkClusterId();
+    public boolean isValidToken(String pathToken);
 
-	public String getParentPath(String path);
+    public boolean isValidPath(String path);
 
-	public String getPathTokenizer();
+    public String getFrameworkClusterId();
 
-	// public String toPathToken(NodeId nodeId);
+    public String getParentPath(String path);
+
+    public String getPathDelimiter();
+
+    // public String toPathToken(NodeId nodeId);
 
 }
