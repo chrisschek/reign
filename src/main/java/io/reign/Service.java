@@ -19,10 +19,6 @@ package io.reign;
 import io.reign.mesg.RequestMessage;
 import io.reign.mesg.ResponseMessage;
 
-import java.util.List;
-
-import org.apache.zookeeper.data.ACL;
-
 /**
  * Common interface for framework service plug-ins.<br/>
  * <br/>
@@ -43,23 +39,23 @@ public interface Service {
 
     public void setContext(ReignContext serviceDirectory);
 
-    public void setDefaultZkAclList(List<ACL> defaultZkAclList);
+    // public void setDefaultZkAclList(List<ACL> defaultZkAclList);
 
     public void setObserverManager(ObserverManager observerManager);
 
-    /**
-     * 
-     * @param pathScheme
-     */
-    public void setPathScheme(PathScheme pathScheme);
+    // /**
+    // *
+    // * @param pathScheme
+    // */
+    // public void setPathScheme(PathScheme pathScheme);
+    //
+    // public PathScheme getPathScheme();
 
-    public PathScheme getPathScheme();
-
-    /**
-     * 
-     * @param zkClient
-     */
-    public void setZkClient(ZkClient zkClient);
+    // /**
+    // *
+    // * @param zkClient
+    // */
+    // public void setZkClient(ZkClient zkClient);
 
     /**
      * 

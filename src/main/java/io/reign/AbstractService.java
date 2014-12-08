@@ -57,14 +57,14 @@ public abstract class AbstractService implements Service {
         return null;
     }
 
-    public List<ACL> getDefaultZkAclList() {
-        return defaultZkAclList;
-    }
-
-    @Override
-    public void setDefaultZkAclList(List<ACL> defaultZkAclList) {
-        this.defaultZkAclList = defaultZkAclList;
-    }
+    // public List<ACL> getDefaultZkAclList() {
+    // return defaultZkAclList;
+    // }
+    //
+    // @Override
+    // public void setDefaultZkAclList(List<ACL> defaultZkAclList) {
+    // this.defaultZkAclList = defaultZkAclList;
+    // }
 
     @Override
     public ReignContext getContext() {
@@ -76,25 +76,25 @@ public abstract class AbstractService implements Service {
         this.context = serviceDirectory;
     }
 
-    @Override
-    public PathScheme getPathScheme() {
-        return pathScheme;
-    }
+    // @Override
+    // public PathScheme getPathScheme() {
+    // return pathScheme;
+    // }
+    //
+    // @Override
+    // public void setPathScheme(PathScheme pathScheme) {
+    // this.pathScheme = pathScheme;
+    //
+    // }
 
-    @Override
-    public void setPathScheme(PathScheme pathScheme) {
-        this.pathScheme = pathScheme;
+    // public ZkClient getZkClient() {
+    // return zkClient;
+    // }
 
-    }
-
-    public ZkClient getZkClient() {
-        return zkClient;
-    }
-
-    @Override
-    public void setZkClient(ZkClient zkClient) {
-        this.zkClient = zkClient;
-    }
+    // @Override
+    // public void setZkClient(ZkClient zkClient) {
+    // this.zkClient = zkClient;
+    // }
 
     @Override
     public abstract void init();
