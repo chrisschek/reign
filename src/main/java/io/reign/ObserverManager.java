@@ -275,6 +275,16 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
                             observer.nodeDeleted(observerData, observerChildList);
                         }
                     }
+                } catch (KeeperException e) {
+                    if (e.code() == KeeperException.Code.NONODE) {
+                        // already deleted, so just log
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Zk node does not exist:  " + e + "; path=" + path);
+                        }
+                    } else {
+                        logger.warn("Unable to check event:  path=" + path, e);
+                    }
+
                 } catch (Exception e) {
                     logger.warn("Unable to check event:  path=" + path, e);
                 }
@@ -287,10 +297,11 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
     @Override
     public boolean filterWatchedEvent(WatchedEvent event) {
         String path = event.getPath();
-        logger.trace("filterWatchedEvent():  path={}; type={}", path, event.getType());
         if (path != null) {
             if (this.getObserverSet(path, false).size() == 0) {
-                logger.trace("filterWatchedEvent():  ignoring event:  path={}; type={}", path, event.getType());
+                if (logger.isTraceEnabled()) {
+                    logger.trace("filterWatchedEvent():  ignoring event:  path={}; type={}", path, event.getType());
+                }
 
                 // ignore events that are not being tracked by an observer
                 return true;
@@ -464,9 +475,12 @@ public class ObserverManager<T extends Observer> extends AbstractZkEventHandler 
             @Override
             public void run() {
                 String path = event.getPath();
-                logger.debug("Notifying ALL observers:  nodeDeleted:  path={}", path);
 
                 Set<T> observerSet = getObserverSet(path, false);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Notifying ALL {} observers:  nodeDeleted:  path={}", observerSet.size(), path);
+                }
+
                 if (observerSet.size() > 0) {
                     // set up watch for when path comes back if there are
                     // observers
