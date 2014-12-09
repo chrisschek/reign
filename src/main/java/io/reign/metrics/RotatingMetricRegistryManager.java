@@ -58,9 +58,17 @@ public class RotatingMetricRegistryManager implements MetricRegistryManager {
     }
 
     public RotatingMetricRegistryManager(MetricRegistry metricRegistry, long rotationInterval, TimeUnit rotationTimeUnit) {
+        if (rotationTimeUnit == null) {
+            throw new IllegalArgumentException("rotationTimeUnit cannot be null!");
+        }
+
         this.rotationInterval = rotationInterval;
         this.rotationTimeUnit = rotationTimeUnit;
         rotationIntervalMillis = rotationTimeUnit.toMillis(rotationInterval);
+
+        if (rotationIntervalMillis < 1000) {
+            throw new IllegalArgumentException("rotationInterval must be at least 1000 millis!");
+        }
 
         this.metricRegistry = metricRegistry;
 
@@ -72,12 +80,20 @@ public class RotatingMetricRegistryManager implements MetricRegistryManager {
     public RotatingMetricRegistryManager(int rotationInterval, TimeUnit rotationTimeUnit,
             MetricRegistryManagerCallback callback) {
         this(rotationInterval, rotationTimeUnit);
+
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null!");
+        }
         registerCallback(callback);
     }
 
     public RotatingMetricRegistryManager(int rotationInterval, TimeUnit rotationTimeUnit,
             List<MetricRegistryManagerCallback> callbackList) {
         this(rotationInterval, rotationTimeUnit);
+
+        if (callbackList == null) {
+            throw new IllegalArgumentException("callbackList cannot be null!");
+        }
         this.callbackList = callbackList;
     }
 
