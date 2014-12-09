@@ -60,7 +60,7 @@ public class MasterTestSuite {
         reign = Reign.maker().findPortAutomatically(true)
                 .zkClient("localhost:" + MasterTestSuite.ZK_TEST_SERVER_PORT, 30000)
                 .zkTestServerPort(ZK_TEST_SERVER_PORT).pathCache(1024, 8).startZkTestServer(true)
-                .onStart(startHook()).onStop(stopHook()).get();
+                .lifecycleEventHandler(lifecycleEventHandler()).get();
 
         // test started hook
         assertFalse("Unexpected before start:  " + startedFlag.get(), startedFlag.get());
@@ -69,21 +69,18 @@ public class MasterTestSuite {
 
     }
 
-    public static Runnable startHook() {
-        return new Runnable() {
+    public static LifecycleEventHandler lifecycleEventHandler() {
+        return new LifecycleEventHandler() {
             @Override
-            public void run() {
+            public void onStart(ReignContext context) {
                 startedFlag.set(true);
             }
-        };
-    }
 
-    public static Runnable stopHook() {
-        return new Runnable() {
             @Override
-            public void run() {
+            public void onStop(ReignContext context) {
                 stoppedFlag.set(true);
             }
+
         };
     }
 

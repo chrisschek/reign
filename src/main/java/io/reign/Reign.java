@@ -85,17 +85,17 @@ public class Reign implements Watcher {
 
     private final TestingServer zkTestServer;
 
-    /** executed on completion of start() */
-    private Runnable startHook;
+    private static final LifecycleEventHandler NULL_LIFECYCLE_EVENT_HANDLER = new NullLifecycleEventHandler();
 
-    /** executed on completion of stop() */
-    private Runnable stopHook;
+    /** executed on completion of start() */
+    private LifecycleEventHandler lifecycleEventHandler = NULL_LIFECYCLE_EVENT_HANDLER;
 
     public static ReignMaker maker() {
         return new ReignMaker();
     }
 
-    public Reign(ZkClient zkClient, PathScheme pathScheme, NodeIdProvider nodeIdProvider, TestingServer zkTestServer) {
+    public Reign(ZkClient zkClient, PathScheme pathScheme, NodeIdProvider nodeIdProvider, TestingServer zkTestServer,
+            LifecycleEventHandler lifecycleEventHandler) {
 
         this.zkClient = zkClient;
 
@@ -107,30 +107,8 @@ public class Reign implements Watcher {
 
         this.zkTestServer = zkTestServer;
 
-    }
+        this.lifecycleEventHandler = lifecycleEventHandler;
 
-    public void onStart(Runnable startHook) {
-        if (started) {
-            throw new IllegalStateException("Cannot set after framework is started!");
-        }
-        this.startHook = startHook;
-    }
-
-    public void onStop(Runnable stopHook) {
-        if (started) {
-            throw new IllegalStateException("Cannot set after framework is started!");
-        }
-        this.stopHook = stopHook;
-    }
-
-    @Deprecated
-    public void setStartHook(Runnable startHook) {
-        onStart(startHook);
-    }
-
-    @Deprecated
-    public void setStopHook(Runnable stopHook) {
-        onStop(stopHook);
     }
 
     public NodeIdProvider getNodeIdProvider() {
@@ -388,10 +366,9 @@ public class Reign implements Watcher {
                     presenceService == null);
         }
 
-        // run start hook
-        if (this.startHook != null) {
-            startHook.run();
-        }
+        /** run stop hook **/
+        logger.info("START:  invoking lifecycleEventHandler:  {}", lifecycleEventHandler.getClass().getName());
+        lifecycleEventHandler.onStart(getContext());
     }
 
     public synchronized void stop() {
@@ -401,42 +378,38 @@ public class Reign implements Watcher {
         }
         shutdown = true;
 
-        logger.info("SHUTDOWN:  begin");
+        logger.info("STOP:  begin");
+
+        /** run stop hook **/
+        logger.info("STOP:  invoking lifecycleEventHandler:  {}", lifecycleEventHandler.getClass().getName());
+        lifecycleEventHandler.onStop(getContext());
 
         /** clean up services **/
-        logger.info("SHUTDOWN:  cleaning up services");
+        logger.info("STOP:  cleaning up services");
         for (ServiceWrapper serviceWrapper : serviceMap.values()) {
             serviceWrapper.getService().destroy();
         }
 
         /** observer manager **/
-        logger.info("SHUTDOWN:  stopping observer manager");
+        logger.info("STOP:  stopping observer manager");
         observerManager.destroy();
 
-        // /** init path cache **/
-        // logger.info("SHUTDOWN:  stopping pathCache...");
-        // pathCache.destroy();
-
         /** clean up zk client **/
-        logger.info("SHUTDOWN:  closing Zookeeper client");
+        logger.info("STOP:  closing Zookeeper client");
         this.zkClient.close();
 
         /** shutdown test zk server, if there **/
         if (this.zkTestServer != null) {
-            logger.info("SHUTDOWN:  stopping test Zookeeper server");
+            logger.info("STOP:  stopping test Zookeeper server");
             try {
                 this.zkTestServer.stop();
             } catch (IOException e) {
-                logger.error("SHUTDOWN:  error shutting down test ZooKeeper:  " + e, e);
+                logger.error("STOP:  error shutting down test ZooKeeper:  " + e, e);
             }
         }
 
-        logger.info("SHUTDOWN:  DONE");
+        logger.info("STOP:  DONE");
 
-        // run stop hook
-        if (this.stopHook != null) {
-            stopHook.run();
-        }
     }
 
     void register(String serviceName, Service service) {

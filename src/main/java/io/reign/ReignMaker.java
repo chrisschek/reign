@@ -79,30 +79,12 @@ public class ReignMaker {
     private boolean startZkTestServer = false;
     private int zkTestServerPort = 22181;
 
-    private Runnable startHook;
-    private Runnable stopHook;
+    private LifecycleEventHandler lifecycleEventHandler;
 
     private boolean findPortAutomatically = false;
 
-    @Deprecated
-    public ReignMaker startHook(Runnable startHook) {
-        onStart(startHook);
-        return this;
-    }
-
-    @Deprecated
-    public ReignMaker stopHook(Runnable stopHook) {
-        onStop(stopHook);
-        return this;
-    }
-
-    public ReignMaker onStart(Runnable startHook) {
-        this.startHook = startHook;
-        return this;
-    }
-
-    public ReignMaker onStop(Runnable stopHook) {
-        this.stopHook = stopHook;
+    public ReignMaker lifecycleEventHandler(LifecycleEventHandler lifecycleEventHandler) {
+        this.lifecycleEventHandler = lifecycleEventHandler;
         return this;
     }
 
@@ -354,10 +336,8 @@ public class ReignMaker {
         }
 
         // build
-        s = new Reign(zkClient, pathScheme, canonicalIdMaker, zkTestServer);
+        s = new Reign(zkClient, pathScheme, canonicalIdMaker, zkTestServer, lifecycleEventHandler);
         s.registerServices(serviceMap);
-        s.onStart(startHook);
-        s.onStop(stopHook);
 
         return s;
     }

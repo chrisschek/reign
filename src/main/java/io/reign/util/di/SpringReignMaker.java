@@ -13,6 +13,7 @@
 
 package io.reign.util.di;
 
+import io.reign.LifecycleEventHandler;
 import io.reign.Reign;
 import io.reign.ReignMaker;
 
@@ -56,12 +57,8 @@ public class SpringReignMaker extends ReignMaker {
         this.findPortAutomatically(findPortAutomatically);
     }
 
-    public void setStartHook(Runnable startHook) {
-        this.onStart(startHook);
-    }
-
-    public void setStopHook(Runnable stopHook) {
-        this.onStop(stopHook);
+    public void setLifecycleEventHandler(LifecycleEventHandler lifecycleEventHandler) {
+        this.lifecycleEventHandler(lifecycleEventHandler);
     }
 
     public void setFrameworkBasePath(String frameworkBasePath) {
