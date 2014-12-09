@@ -72,10 +72,14 @@ public class MetricsServiceRequestBuilder {
                 persistFrequencyTimeUnit);
     }
 
+    /**
+     * Convenience method that wraps given MetricRegistry with a RotatingMetricRegistryManager
+     */
     public MetricRegistryManager exportAs(String serviceId, MetricRegistry registry) {
         MetricRegistryManager metricRegistryManager = new RotatingMetricRegistryManager(registry, rotateFrequency,
                 rotateFrequencyTimeUnit);
-        exportAs(serviceId, metricRegistryManager);
+        this.metricsService.scheduleExport(clusterId, serviceId, metricRegistryManager, persistFrequency,
+                persistFrequencyTimeUnit);
         return metricRegistryManager;
     }
 
