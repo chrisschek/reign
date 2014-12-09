@@ -33,10 +33,6 @@ public class LeaseServiceRequestBuilder {
         return this;
     }
 
-    public Subscription tryAcquire(long durationMillis, LeaseEventSubscriber subscriber) {
-        return leaseService.tryAcquire(clusterId, poolId, poolSize, durationMillis).subscribe(subscriber);
-    }
-
     public Subscription acquire(long durationMillis, LeaseEventSubscriber subscriber) {
         return leaseService.acquire(clusterId, poolId, poolSize, durationMillis).subscribe(subscriber);
     }
@@ -51,10 +47,6 @@ public class LeaseServiceRequestBuilder {
 
     public Subscription revoke(String leaseId, LeaseEventSubscriber subscriber) {
         return leaseService.revoke(clusterId, poolId, poolSize, leaseId).subscribe(subscriber);
-    }
-
-    public Observable<LeaseEvent> tryAcquire(long durationMillis) {
-        return leaseService.tryAcquire(clusterId, poolId, poolSize, durationMillis);
     }
 
     public Observable<LeaseEvent> acquire(long durationMillis) {
