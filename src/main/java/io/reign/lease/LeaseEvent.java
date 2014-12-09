@@ -19,7 +19,7 @@ public class LeaseEvent {
     }
 
     public static enum LeaseEventType {
-        ACQUIRED, RENEWED, RELEASED, REVOKED, NOT_ACQUIRED;
+        ACQUIRED, RENEWED, RELEASED, REVOKED;
     }
 
 }
