@@ -26,9 +26,6 @@ import rx.Observable;
  */
 public interface LeaseService extends Service {
 
-    public Observable<LeaseEvent> tryAcquire(final String clusterId, final String poolId, final int poolSize,
-            final long durationMillis);
-
     public Observable<LeaseEvent> acquire(String clusterId, String leasePoolId, int poolSize, long durationMillis);
 
     public Observable<LeaseEvent> renew(String clusterId, String leasePoolId, int poolSize,

@@ -286,12 +286,6 @@ public class DefaultLeaseService extends AbstractService implements LeaseService
         return acquire(clusterId, poolId, poolSize, durationMillis, -1);
     }
 
-    @Override
-    public Observable<LeaseEvent> tryAcquire(final String clusterId, final String poolId, final int poolSize,
-            final long durationMillis) {
-        return acquire(clusterId, poolId, poolSize, durationMillis, 0);
-    }
-
     Observable<LeaseEvent> acquire(final String clusterId, final String poolId, final int poolSize,
             final long durationMillis, final long timeoutMillis) {
         throwExceptionIfInvalidParameters(clusterId, poolId, poolSize, durationMillis);
