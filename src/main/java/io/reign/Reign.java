@@ -355,6 +355,10 @@ public class Reign implements Watcher {
 
         logger.info("START:  DONE");
 
+        /** run start hook **/
+        logger.info("START:  invoking lifecycleEventHandler:  {}", lifecycleEventHandler.getClass().getName());
+        lifecycleEventHandler.onStart(getContext());
+
         /** announce as a Reign Server: must be done after all other start-up tasks are complete **/
         PresenceService presenceService = context.getService("presence");
         if (presenceService != null) {
@@ -365,9 +369,6 @@ public class Reign implements Watcher {
                     presenceService == null);
         }
 
-        /** run stop hook **/
-        logger.info("START:  invoking lifecycleEventHandler:  {}", lifecycleEventHandler.getClass().getName());
-        lifecycleEventHandler.onStart(getContext());
     }
 
     public synchronized void stop() {
@@ -439,7 +440,7 @@ public class Reign implements Watcher {
                 while (!started) {
                     logger.info("Waiting for notification of start() completion...");
                     synchronized (this) {
-                        this.wait(60000);
+                        this.wait(1000);
                     }
                 }
             } catch (InterruptedException e) {
