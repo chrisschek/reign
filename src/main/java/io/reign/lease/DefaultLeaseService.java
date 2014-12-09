@@ -71,15 +71,15 @@ public class DefaultLeaseService extends AbstractService implements LeaseService
     @Override
     public void init() {
         executorService = Executors.newSingleThreadExecutor();
-        reservationManager = new ZkLeaseReservationManager(getContext().getZkClient(), getContext().getPathScheme());
-
         Runnable supervisorRunnable = new LeaseSupervisorRunnable();
         executorService.submit(supervisorRunnable);
+
+        reservationManager = new ZkLeaseReservationManager(getContext().getZkClient(), getContext().getPathScheme());
     }
 
     public class LeaseSupervisorRunnable implements Runnable {
 
-        private static final long DEFAULT_GROOM_INTERVAL_MS = 10000;
+        private static final long DEFAULT_GROOM_INTERVAL_MS = 5000;
         private static final long DEFAULT_SUPERVISOR_CHECK_INTERVAL_MS = 60000;
 
         private volatile long nextSupervisorCheckTimestamp = -1;
@@ -164,7 +164,9 @@ public class DefaultLeaseService extends AbstractService implements LeaseService
                             supervisorNodeIdList.size(), currentTimestamp, nextSupervisorCheckTimestamp,
                             nextGroomBaseTimestamp,
                             nextGroomTimestamp);
-                }
+                } else {
+                    logger.warn("LEASE_SUPERVISOR: no supervisors found!");
+                }// supervisorNodeIdList.size() > 0
             }
 
             // do grooming of leases
