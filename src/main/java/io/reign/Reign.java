@@ -85,9 +85,8 @@ public class Reign implements Watcher {
 
     private final TestingServer zkTestServer;
 
-    private static final LifecycleEventHandler NULL_LIFECYCLE_EVENT_HANDLER = new NullLifecycleEventHandler();
+    public static final LifecycleEventHandler NULL_LIFECYCLE_EVENT_HANDLER = new NullLifecycleEventHandler();
 
-    /** executed on completion of start() */
     private LifecycleEventHandler lifecycleEventHandler = NULL_LIFECYCLE_EVENT_HANDLER;
 
     public static ReignMaker maker() {
