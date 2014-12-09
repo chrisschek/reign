@@ -50,9 +50,6 @@ public abstract class LeaseEventSubscriber extends Subscriber<LeaseEvent> {
     public void revoked(Lease lease) {
     }
 
-    public void notAcquired() {
-    }
-
     public void error(Throwable e) {
     }
 
@@ -71,9 +68,6 @@ public abstract class LeaseEventSubscriber extends Subscriber<LeaseEvent> {
             break;
         case REVOKED:
             revoked(lease);
-            break;
-        case NOT_ACQUIRED:
-            notAcquired();
             break;
         default:
             logger.error("Unrecognized event type:  " + event.getType());
