@@ -79,7 +79,7 @@ public class ReignMaker {
     private boolean startZkTestServer = false;
     private int zkTestServerPort = 22181;
 
-    private LifecycleEventHandler lifecycleEventHandler;
+    private LifecycleEventHandler lifecycleEventHandler = Reign.NULL_LIFECYCLE_EVENT_HANDLER;
 
     private boolean findPortAutomatically = false;
 
