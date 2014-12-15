@@ -53,13 +53,20 @@ public class MetricsServiceTest {
         metricsService.observe("clusterMetrics", "serviceC", new MetricsObserver() {
             @Override
             public void updated(MetricsData updated, MetricsData previous) {
-                calledCount.incrementAndGet();
 
-                logger.debug(
-                        "*** OBSERVER (testObserver):  calledCount={}; updated.observerTestCounter={}; previous.observerTestCounter={}",
-                        calledCount.get(), updated != null ? updated.getCounter("observerTestCounter").getCount()
-                                : null,
-                        previous != null ? previous.getCounter("observerTestCounter").getCount() : null);
+                // only count updates, not created
+                if (previous != null) {
+                    calledCount.incrementAndGet();
+                }
+
+                if (updated.getCounter("observerTestCounter") != null
+                        && previous.getCounter("observerTestCounter") != null) {
+                    logger.debug(
+                            "*** OBSERVER (testObserver):  calledCount={}; updated.observerTestCounter={}; previous.observerTestCounter={}",
+                            calledCount.get(), updated != null ? updated.getCounter("observerTestCounter").getCount()
+                                    : null,
+                            previous != null ? previous.getCounter("observerTestCounter").getCount() : null);
+                }
 
                 latest.set(updated);
                 synchronized (calledCount) {
@@ -75,9 +82,11 @@ public class MetricsServiceTest {
 
         // wait for update
         synchronized (calledCount) {
-            calledCount.wait(metricsService.getUpdateIntervalMillis() * 4 + 5000);
+            for (int i = 0; i < 40 && calledCount.get() == 0; i++) {
+                calledCount.wait(metricsService.getUpdateIntervalMillis() / 4);
+            }
         }
-        assertTrue("Expected 1, got " + calledCount.get(), calledCount.get() >= 1);
+        assertTrue("Expected >=1, got " + calledCount.get(), calledCount.get() >= 1);
 
         // force a change so observer will be called again
         long previousValue = observerTestCounter.getCount();
@@ -85,11 +94,15 @@ public class MetricsServiceTest {
 
         // wait for update
         synchronized (calledCount) {
-            calledCount.wait(metricsService.getUpdateIntervalMillis() * 4 + 5000);
+            for (int i = 0; i < 40
+                    && (latest.get().getCounter("observerTestCounter") == null || latest.get()
+                            .getCounter("observerTestCounter").getCount() == 0); i++) {
+                calledCount.wait(metricsService.getUpdateIntervalMillis() / 4);
+            }
         }
         assertTrue("calledCount should be >1, but is " + calledCount.get(), calledCount.get() > 1);
         assertTrue("latest.observerTestCounter should be " + (previousValue + 1) + ", but is "
-                + latest.get().getCounter("observerTestCounter").getCount(),
+                + latest.get().getCounter("observerTestCounter").getCount() + "; calledCount=" + calledCount.get(),
                 latest.get().getCounter("observerTestCounter").getCount() == (previousValue + 1));
 
     }
@@ -193,7 +206,7 @@ public class MetricsServiceTest {
         metricsService.scheduleExport("clusterMetrics", "serviceA", registryManager, 5, TimeUnit.SECONDS);
 
         MetricsData metricsData = metricsService.getMyMetrics("clusterMetrics", "serviceA");
-        while (metricsData == null) {
+        for (int i = 0; i < 20 && metricsData == null; i++) {
             metricsData = metricsService.getMyMetrics("clusterMetrics", "serviceA");
             Thread.sleep(1000);
         }
@@ -207,8 +220,8 @@ public class MetricsServiceTest {
         // gauges
         GaugeData gauge1 = metricsData.getGauge("gauge1");
         GaugeData gauge2 = metricsData.getGauge("gauge2");
-        assertTrue(gauge1.getValue() == 1.0);
-        assertTrue(gauge2.getValue() == 2.0);
+        assertTrue(((Double) gauge1.getValue()) == 1.0);
+        assertTrue(((Double) gauge2.getValue()) == 2.0);
 
         // meters
         MeterData meter1 = metricsData.getMeter("meter1");
@@ -265,8 +278,8 @@ public class MetricsServiceTest {
         // gauges
         GaugeData gauge1 = metricsData.getGauge("gauge1");
         GaugeData gauge2 = metricsData.getGauge("gauge2");
-        assertTrue(gauge1.getValue() == 1.0);
-        assertTrue(gauge2.getValue() == 2.0);
+        assertTrue(((Double) gauge1.getValue()) == 1.0);
+        assertTrue(((Double) gauge2.getValue()) == 2.0);
 
         // meters
         MeterData meter1 = metricsData.getMeter("meter1");
@@ -281,8 +294,8 @@ public class MetricsServiceTest {
         assertTrue(timer2.getCount() == 4);
 
         // check thresholds instead of exact values since these are estimations
-        assertTrue(Math.floor(timer1.getMax()) - 100 < 5);
-        assertTrue(Math.floor(timer2.getMax()) - 200 < 5);
+        assertTrue(Math.floor(timer1.getMax()) - 100 < 50);
+        assertTrue(Math.floor(timer2.getMax()) - 200 < 50);
 
         // histograms
         HistogramData histo1 = metricsData.getHistogram("histo1");

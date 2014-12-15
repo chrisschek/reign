@@ -213,7 +213,6 @@ public class ZkMetricsReporter {
                 reportGauge(sb, name, entry.getValue());
             }
             sb.append("\n}");
-
         }
 
         if (histograms.size() > 0) {
