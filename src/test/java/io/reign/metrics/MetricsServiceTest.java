@@ -220,8 +220,10 @@ public class MetricsServiceTest {
         // gauges
         GaugeData gauge1 = metricsData.getGauge("gauge1");
         GaugeData gauge2 = metricsData.getGauge("gauge2");
+        GaugeData gauge3 = metricsData.getGauge("gauge3");
         assertTrue(((Double) gauge1.getValue()) == 1.0);
         assertTrue(((Double) gauge2.getValue()) == 2.0);
+        assertTrue("Gauges that return non-numeric values should not be exported", gauge3 == null);
 
         // meters
         MeterData meter1 = metricsData.getMeter("meter1");
@@ -278,8 +280,10 @@ public class MetricsServiceTest {
         // gauges
         GaugeData gauge1 = metricsData.getGauge("gauge1");
         GaugeData gauge2 = metricsData.getGauge("gauge2");
+        GaugeData gauge3 = metricsData.getGauge("gauge3");
         assertTrue(((Double) gauge1.getValue()) == 1.0);
         assertTrue(((Double) gauge2.getValue()) == 2.0);
+        assertTrue("Gauges that return non-numeric values should not be exported", gauge3 == null);
 
         // meters
         MeterData meter1 = metricsData.getMeter("meter1");
@@ -340,7 +344,13 @@ public class MetricsServiceTest {
                     public Integer getValue() {
                         return 2;
                     }
-
+                });
+        Gauge<String> gauge3 = registryManager.get().register(MetricRegistry.name("gauge3"),
+                new Gauge<String>() {
+                    @Override
+                    public String getValue() {
+                        return "shouldNotBeExported";
+                    }
                 });
 
         // meters
