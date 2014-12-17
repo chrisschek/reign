@@ -5,6 +5,8 @@ import io.reign.MasterTestSuite;
 import io.reign.presence.PresenceService;
 import io.reign.util.JacksonUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -221,9 +223,11 @@ public class MetricsServiceTest {
         GaugeData gauge1 = metricsData.getGauge("gauge1");
         GaugeData gauge2 = metricsData.getGauge("gauge2");
         GaugeData gauge3 = metricsData.getGauge("gauge3");
+        GaugeData gauge4 = metricsData.getGauge("gauge4");
         assertTrue(((Double) gauge1.getValue()) == 1.0);
         assertTrue(((Double) gauge2.getValue()) == 2.0);
         assertTrue("Gauges that return non-numeric values should not be exported", gauge3 == null);
+        assertTrue("Gauges that return non-numeric values should not be exported", gauge4 == null);
 
         // meters
         MeterData meter1 = metricsData.getMeter("meter1");
@@ -281,9 +285,11 @@ public class MetricsServiceTest {
         GaugeData gauge1 = metricsData.getGauge("gauge1");
         GaugeData gauge2 = metricsData.getGauge("gauge2");
         GaugeData gauge3 = metricsData.getGauge("gauge3");
+        GaugeData gauge4 = metricsData.getGauge("gauge4");
         assertTrue(((Double) gauge1.getValue()) == 1.0);
         assertTrue(((Double) gauge2.getValue()) == 2.0);
         assertTrue("Gauges that return non-numeric values should not be exported", gauge3 == null);
+        assertTrue("Gauges that return non-numeric values should not be exported", gauge4 == null);
 
         // meters
         MeterData meter1 = metricsData.getMeter("meter1");
@@ -329,7 +335,7 @@ public class MetricsServiceTest {
         counter1.inc();
         counter2.inc(2);
 
-        // gauges
+        // gauges that should be serialized
         Gauge<Integer> gauge1 = registryManager.get().register(MetricRegistry.name("gauge1"),
                 new Gauge<Integer>() {
                     @Override
@@ -345,11 +351,21 @@ public class MetricsServiceTest {
                         return 2;
                     }
                 });
+
+        // gauges that should not be serialized
         Gauge<String> gauge3 = registryManager.get().register(MetricRegistry.name("gauge3"),
                 new Gauge<String>() {
                     @Override
                     public String getValue() {
                         return "shouldNotBeExported";
+                    }
+                });
+        Gauge<List<Number>> gauge4 = registryManager.get().register(MetricRegistry.name("gauge4"),
+                new Gauge<List<Number>>() {
+                    @Override
+                    public List<Number> getValue() {
+                        List<Number> list = new ArrayList<Number>(1);
+                        return list;
                     }
                 });
 
