@@ -107,21 +107,9 @@ public class RotatingMetricRegistryManager implements MetricRegistryManager {
         synchronized (gaugeMergeFunctionMap) {
             if (gaugeMergeFunctionMap == Collections.EMPTY_MAP) {
                 gaugeMergeFunctionMap = new HashMap<String, MergeFunction<?>>();
-
-                synchronized (gaugeMergeFunctionMap) {
-                    if (gaugeMergeFunctionMap.containsKey(gaugeName)) {
-                        return;
-                    }
-                    gaugeMergeFunctionMap.put(gaugeName, mergeFunction);
-                }
-            } else {
-                if (gaugeMergeFunctionMap.containsKey(gaugeName)) {
-                    return;
-                }
-                gaugeMergeFunctionMap.put(gaugeName, mergeFunction);
             }
+            gaugeMergeFunctionMap.put(gaugeName, mergeFunction);
         }
-
     }
 
     @Override
