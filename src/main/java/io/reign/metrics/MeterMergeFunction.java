@@ -13,10 +13,10 @@ public class MeterMergeFunction implements MergeFunction<MeterData> {
         double m5RateSum = 0;
         double m15RateSum = 0;
         for (MeterData data : dataList) {
-            meanRateSum += (data.getMeanRate() * data.getCount());
-            m1RateSum += (data.getM1Rate() * data.getCount());
-            m5RateSum += (data.getM5Rate() * data.getCount());
-            m15RateSum += (data.getM15Rate() * data.getCount());
+            meanRateSum += data.getMeanRate() * data.getCount();
+            m1RateSum += data.getM1Rate() * data.getCount();
+            m5RateSum += data.getM5Rate() * data.getCount();
+            m15RateSum += data.getM15Rate() * data.getCount();
             samples += data.getCount();
         }
 
@@ -30,10 +30,10 @@ public class MeterMergeFunction implements MergeFunction<MeterData> {
         if (samples > 0) {
             // average rates and then multiple by number of data points to get
             // aggregate rates
-            meterData.setMeanRate(meanRateSum / samples * datumCount);
-            meterData.setM1Rate(m1RateSum / samples * datumCount);
-            meterData.setM5Rate(m5RateSum / samples * datumCount);
-            meterData.setM15Rate(m15RateSum / samples * datumCount);
+            meterData.setMeanRate(meanRateSum / samples);
+            meterData.setM1Rate(m1RateSum / samples);
+            meterData.setM5Rate(m5RateSum / samples);
+            meterData.setM15Rate(m15RateSum / samples);
         }
 
         return meterData;
