@@ -639,8 +639,10 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
                 Collections.sort(memberServiceIds);
                 for (int i = 0; i < memberServiceIds.size(); i++) {
                     String serviceId = memberServiceIds.get(i);
+                    int serviceNodeCount = presenceService.getServiceInfo(clusterId, serviceId).getNodeIdList().size();
 
-                    logger.trace("Finding data nodes:  clusterId={}; serviceId={}", clusterId, serviceId);
+                    logger.trace("Finding data nodes:  clusterId={}; serviceId={}; serviceNodeCount={}", clusterId,
+                            serviceId, serviceNodeCount);
 
                     // get lock for a service
                     DistributedLock lock = coordinationService.getLock("reign", "metrics-" + clusterId + "-"
@@ -848,6 +850,14 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
                             // }
                             if (meterList != null && meterList.size() > 0) {
                                 MeterData meterData = meterMergeFunction.merge(meterList);
+
+                                // special treatment for meters to multiply weighted avg. by number of nodes to estimate
+                                // meter numbers across service
+                                meterData.setMeanRate(meterData.getMeanRate() * serviceNodeCount);
+                                meterData.setM1Rate(meterData.getM1Rate() * serviceNodeCount);
+                                meterData.setM5Rate(meterData.getM5Rate() * serviceNodeCount);
+                                meterData.setM15Rate(meterData.getM15Rate() * serviceNodeCount);
+
                                 meters.put(key, meterData);
                             }
                         }
