@@ -53,6 +53,14 @@ public class SpringReignMaker extends ReignMaker {
         this.attributeMap = attributeMap;
     }
 
+    public void setStartHook(Runnable startHook) {
+        this.startHook(startHook);
+    }
+
+    public void setStopHook(Runnable stopHook) {
+        this.stopHook(stopHook);
+    }
+    
     public void setFindPortAutomatically(boolean findPortAutomatically) {
         this.findPortAutomatically(findPortAutomatically);
     }

@@ -89,6 +89,12 @@ public class Reign implements Watcher {
 
     private LifecycleEventHandler lifecycleEventHandler = NULL_LIFECYCLE_EVENT_HANDLER;
 
+    /** executed on completion of start() */
+    private Runnable startHook;
+
+    /** executed on completion of stop() */
+    private Runnable stopHook;
+    
     public static ReignMaker maker() {
         return new ReignMaker();
     }
@@ -108,6 +114,20 @@ public class Reign implements Watcher {
 
         this.lifecycleEventHandler = lifecycleEventHandler;
 
+    }
+    
+    public synchronized void setStartHook(Runnable startHook) {
+        if (started) {
+            throw new IllegalStateException("Cannot set after framework is started!");
+        }
+        this.startHook = startHook;
+    }
+
+    public synchronized void setStopHook(Runnable stopHook) {
+        if (started) {
+            throw new IllegalStateException("Cannot set after framework is started!");
+        }
+        this.stopHook = stopHook;
     }
 
     public NodeIdProvider getNodeIdProvider() {
@@ -368,7 +388,11 @@ public class Reign implements Watcher {
             logger.warn("START:  did not announce node availability:  (presenceService==null)={}",
                     presenceService == null);
         }
-
+        
+        // run start hook
+        if (this.startHook != null) {
+            startHook.run();
+        }
     }
 
     public synchronized void stop() {
@@ -409,7 +433,11 @@ public class Reign implements Watcher {
         }
 
         logger.info("STOP:  DONE");
-
+        
+        // run stop hook
+        if (this.stopHook != null) {
+            stopHook.run();
+        }
     }
 
     void register(String serviceName, Service service) {
