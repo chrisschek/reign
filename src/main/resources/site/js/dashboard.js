@@ -462,39 +462,39 @@ $(function() {
               $('#metrics-timer-list').fadeIn('fast').removeClass('hidden');
 			}
 		}// timers
-        
+
         // gauges
-		if( metrics.gauges ) {
-			var gauges = metrics.gauges;
-			var gaugeHtml = '';
-			var count = 0;
+        if( metrics.gauges ) {
+            var gauges = metrics.gauges;
+            var gaugeHtml = '';
+            var count = 0;
             var metricKeyList = sortedKeyList(gauges);
-			for(var i = 0; i < metricKeyList.length; i++) {		
-              var gaugeName = metricKeyList[i];
-			  var gauge = gauges[gaugeName];
-              gaugeHtml += '<tr id="'+gaugeName+'" class="metric-data">';
-              gaugeHtml += '<td>'+gaugeName+'</td>';
-              gaugeHtml += '<td>';
-              if (typeof(gauge.value) == "object") {
-                  var sortedObj = sortObject(gauge.value);
-                  for (var i = 0; i < sortedObj.length; i++) {
-                      var key = sortedObj[i].key;
-                      var value = sortedObj[i].value;
-                      gaugeHtml += key+' : '+value+'<br/>';
-                  }
-              } else {
-                  gaugeHtml += gauge.value;
-              }
-              gaugeHtml += '</td>';
-              gaugeHtml += '</tr>';
-		      count++;
+            for(var i = 0; i < metricKeyList.length; i++) {		
+                var gaugeName = metricKeyList[i];
+                var gauge = gauges[gaugeName];
+                gaugeHtml += '<tr id="'+gaugeName+'" class="metric-data">';
+                gaugeHtml += '<td>'+gaugeName+'</td>';
+                gaugeHtml += '<td>';
+                if (typeof(gauge.value) == "object") {
+                    var sortedObj = sortObject(gauge.value);
+                    for (var i = 0; i < sortedObj.length; i++) {
+                        var key = sortedObj[i].key;
+                        var value = sortedObj[i].value;
+                        gaugeHtml += key+' : '+value+'<br/>';
+                    }
+                } else {
+                    gaugeHtml += gauge.value;
+                }
+                gaugeHtml += '</td>';
+                gaugeHtml += '</tr>';
+                count++;
 			}
-			if( count>0 ) {
-			  $('#metrics-gauge-list-data').html(gaugeHtml);
-              $('#metrics-gauge-list').fadeIn('fast').removeClass('hidden');
-			}
-		}// gauges
-	}
+            if( count>0 ) {
+                $('#metrics-gauge-list-data').html(gaugeHtml);
+                $('#metrics-gauge-list').fadeIn('fast').removeClass('hidden');
+            }
+        }// gauges
+    }
     
     function sortObject(obj) {
         var arr = [];
