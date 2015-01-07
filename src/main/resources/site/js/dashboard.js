@@ -477,7 +477,7 @@ $(function() {
                 gaugeHtml += '<td>';
                 if (typeof(gauge.value) == "object") {
                     var sortedObj = sortObject(gauge.value);
-                    for (var i = 0; i < sortedObj.length; i++) {
+                    for (var i = 0; i < Math.min(20, sortedObj.length); i++) {
                         var key = sortedObj[i].key;
                         var value = sortedObj[i].value;
                         gaugeHtml += key+' : '+value+'<br/>';
