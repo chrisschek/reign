@@ -15,7 +15,7 @@ import com.codahale.metrics.Counter;
  * @author ypai
  *
  */
-public class KeyCountersMergeFunction implements MergeFunction<GaugeData<Map<String, Integer>>> {
+public class ListCountersMergeFunction implements MergeFunction<GaugeData<Map<String, Integer>>> {
 
     @Override
     public GaugeData<Map<String, Integer>> merge(List<GaugeData<Map<String, Integer>>> dataList) {
@@ -27,6 +27,7 @@ public class KeyCountersMergeFunction implements MergeFunction<GaugeData<Map<Str
                 // if already exists, add on to it
                 if (mergedCounters.containsKey(key)) {
                     int newCount = mergedCounters.get(key) + count;
+                    mergedCounters.put(key, newCount);
                 } else {
                     mergedCounters.put(key, count);
                 }
