@@ -31,8 +31,8 @@ public class MasterTestSuite {
 
     private static final Logger logger = LoggerFactory.getLogger(MasterTestSuite.class);
 
-    private static final AtomicBoolean startedFlag = new AtomicBoolean(false);
-    private static final AtomicBoolean stoppedFlag = new AtomicBoolean(false);
+    private static final AtomicBoolean afterStartFlag = new AtomicBoolean(false);
+    private static final AtomicBoolean beforeStopFlag = new AtomicBoolean(false);
 
     private static Reign reign;
 
@@ -64,22 +64,30 @@ public class MasterTestSuite {
                 .lifecycleEventHandler(lifecycleEventHandler()).get();
 
         // test started hook
-        assertFalse("Unexpected before start:  " + startedFlag.get(), startedFlag.get());
+        assertFalse("Unexpected before start:  " + afterStartFlag.get(), afterStartFlag.get());
         reign.start();
-        assertTrue("Unexpected after start:  " + startedFlag.get(), startedFlag.get());
+        assertTrue("Unexpected after start:  " + afterStartFlag.get(), afterStartFlag.get());
 
     }
 
     public static LifecycleEventHandler lifecycleEventHandler() {
         return new LifecycleEventHandler() {
             @Override
-            public void onStart(ReignContext context) {
-                startedFlag.set(true);
+            public void started(ReignContext context) {
+                afterStartFlag.set(true);
             }
 
             @Override
-            public void onStop(ReignContext context) {
-                stoppedFlag.set(true);
+            public void stopping(ReignContext context) {
+                beforeStopFlag.set(true);
+            }
+
+            @Override
+            public void starting() {
+            }
+
+            @Override
+            public void stopped() {
             }
 
         };
@@ -97,9 +105,9 @@ public class MasterTestSuite {
 
             // stop reign
             // test stopped hook
-            assertFalse("Unexpected before stop:  " + stoppedFlag.get(), stoppedFlag.get());
+            assertFalse("Unexpected before stop:  " + beforeStopFlag.get(), beforeStopFlag.get());
             reign.stop();
-            assertTrue("Unexpected after stop:  " + stoppedFlag.get(), stoppedFlag.get());
+            assertTrue("Unexpected after stop:  " + beforeStopFlag.get(), beforeStopFlag.get());
 
         } catch (Exception e) {
             logger.error("Trouble starting test ZooKeeper instance:  " + e, e);
