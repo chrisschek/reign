@@ -50,8 +50,6 @@ public class RotatingMetricRegistryManager implements MetricRegistryManager {
     private final long rotationIntervalMillis;
     private List<MetricRegistryManagerCallback> callbackList = Collections.EMPTY_LIST;
 
-    // private Map<String, MergeFunction<?>> gaugeMergeFunctionMap = Collections.EMPTY_MAP;
-
     public RotatingMetricRegistryManager(long rotationInterval, TimeUnit rotationTimeUnit) {
         this(new MetricRegistry(), rotationInterval, rotationTimeUnit);
 
@@ -96,38 +94,6 @@ public class RotatingMetricRegistryManager implements MetricRegistryManager {
         }
         this.callbackList = callbackList;
     }
-
-    // @Override
-    // public MergeFunction<?> getGaugeMergeFunction(String gaugeName) {
-    // return gaugeMergeFunctionMap.get(gaugeName);
-    // }
-    //
-    // @Override
-    // public void setGaugeMergeFunction(String gaugeName, MergeFunction<?> mergeFunction) {
-    // synchronized (gaugeMergeFunctionMap) {
-    // if (gaugeMergeFunctionMap == Collections.EMPTY_MAP) {
-    // gaugeMergeFunctionMap = new HashMap<String, MergeFunction<?>>();
-    // }
-    // gaugeMergeFunctionMap.put(gaugeName, mergeFunction);
-    // }
-    // }
-    //
-    // @Override
-    // public void removeGaugeMergeFunction(String gaugeName) {
-    // synchronized (gaugeMergeFunctionMap) {
-    // if (gaugeMergeFunctionMap == Collections.EMPTY_MAP) {
-    // return;
-    // }
-    // gaugeMergeFunctionMap.remove(gaugeName);
-    // }
-    // }
-    //
-    // @Override
-    // public void removeAllGaugeMergeFunctions() {
-    // synchronized (gaugeMergeFunctionMap) {
-    // gaugeMergeFunctionMap = Collections.EMPTY_MAP;
-    // }
-    // }
 
     @Override
     public void registerCallback(MetricRegistryManagerCallback callback) {
