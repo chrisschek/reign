@@ -205,14 +205,18 @@ public class ZkMetricsReporter {
             int i = 0;
             sb.append("\"gauges\":{\n");
             for (Map.Entry<String, Gauge> entry : gauges.entrySet()) {
-                if (i++ > 0) {
-                    sb.append(",\n");
+
+                Gauge gauge = entry.getValue();
+                if (gauge instanceof MergeableGauge) {
+                    if (i++ > 0) {
+                        sb.append(",\n");
+                    }
+                    String name = entry.getKey();
+                    sb.append("    \"");
+                    sb.append(name);
+                    sb.append("\":");
+                    reportGauge(sb, name, gauge);
                 }
-                String name = entry.getKey();
-                sb.append("    \"");
-                sb.append(name);
-                sb.append("\":");
-                reportGauge(sb, name, entry.getValue());
             }
             sb.append("\n}");
 

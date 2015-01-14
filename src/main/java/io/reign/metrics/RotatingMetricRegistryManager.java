@@ -1,11 +1,11 @@
 /*
  * Copyright 2013 Yen Pai ypai@reign.io
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
@@ -17,7 +17,6 @@ import io.reign.util.TimeUnitUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,9 +34,9 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 
 /**
- * 
+ *
  * @author ypai
- * 
+ *
  */
 public class RotatingMetricRegistryManager implements MetricRegistryManager {
 
@@ -50,7 +49,8 @@ public class RotatingMetricRegistryManager implements MetricRegistryManager {
     private final TimeUnit rotationTimeUnit;
     private final long rotationIntervalMillis;
     private List<MetricRegistryManagerCallback> callbackList = Collections.EMPTY_LIST;
-    private Map<String, MergeFunction<?>> gaugeMergeFunctionMap = Collections.EMPTY_MAP;
+
+    // private Map<String, MergeFunction<?>> gaugeMergeFunctionMap = Collections.EMPTY_MAP;
 
     public RotatingMetricRegistryManager(long rotationInterval, TimeUnit rotationTimeUnit) {
         this(new MetricRegistry(), rotationInterval, rotationTimeUnit);
@@ -97,37 +97,37 @@ public class RotatingMetricRegistryManager implements MetricRegistryManager {
         this.callbackList = callbackList;
     }
 
-    @Override
-    public MergeFunction<?> getGaugeMergeFunction(String gaugeName) {
-        return gaugeMergeFunctionMap.get(gaugeName);
-    }
-
-    @Override
-    public void setGaugeMergeFunction(String gaugeName, MergeFunction<?> mergeFunction) {
-        synchronized (gaugeMergeFunctionMap) {
-            if (gaugeMergeFunctionMap == Collections.EMPTY_MAP) {
-                gaugeMergeFunctionMap = new HashMap<String, MergeFunction<?>>();
-            }
-            gaugeMergeFunctionMap.put(gaugeName, mergeFunction);
-        }
-    }
-
-    @Override
-    public void removeGaugeMergeFunction(String gaugeName) {
-        synchronized (gaugeMergeFunctionMap) {
-            if (gaugeMergeFunctionMap == Collections.EMPTY_MAP) {
-                return;
-            }
-            gaugeMergeFunctionMap.remove(gaugeName);
-        }
-    }
-
-    @Override
-    public void removeAllGaugeMergeFunctions() {
-        synchronized (gaugeMergeFunctionMap) {
-            gaugeMergeFunctionMap = Collections.EMPTY_MAP;
-        }
-    }
+    // @Override
+    // public MergeFunction<?> getGaugeMergeFunction(String gaugeName) {
+    // return gaugeMergeFunctionMap.get(gaugeName);
+    // }
+    //
+    // @Override
+    // public void setGaugeMergeFunction(String gaugeName, MergeFunction<?> mergeFunction) {
+    // synchronized (gaugeMergeFunctionMap) {
+    // if (gaugeMergeFunctionMap == Collections.EMPTY_MAP) {
+    // gaugeMergeFunctionMap = new HashMap<String, MergeFunction<?>>();
+    // }
+    // gaugeMergeFunctionMap.put(gaugeName, mergeFunction);
+    // }
+    // }
+    //
+    // @Override
+    // public void removeGaugeMergeFunction(String gaugeName) {
+    // synchronized (gaugeMergeFunctionMap) {
+    // if (gaugeMergeFunctionMap == Collections.EMPTY_MAP) {
+    // return;
+    // }
+    // gaugeMergeFunctionMap.remove(gaugeName);
+    // }
+    // }
+    //
+    // @Override
+    // public void removeAllGaugeMergeFunctions() {
+    // synchronized (gaugeMergeFunctionMap) {
+    // gaugeMergeFunctionMap = Collections.EMPTY_MAP;
+    // }
+    // }
 
     @Override
     public void registerCallback(MetricRegistryManagerCallback callback) {
@@ -171,6 +171,11 @@ public class RotatingMetricRegistryManager implements MetricRegistryManager {
     @Override
     public Counter counter(String name) {
         return this.metricRegistry.counter(name);
+    }
+
+    @Override
+    public Gauge gauge(String name) {
+        return this.metricRegistry.getGauges().get(name);
     }
 
     @Override

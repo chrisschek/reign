@@ -40,6 +40,63 @@ public class MetricsServiceTest {
         presenceService.announce("clusterMetrics", "serviceD", true);
     }
 
+    // @Test
+    // public void testObserver() throws Exception {
+    // presenceService.waitUntilAvailable("clusterMetrics", "serviceC", 30000);
+    //
+    // MetricRegistryManager registryManager = getMetricRegistryManager(new RotatingMetricRegistryManager(300,
+    // TimeUnit.SECONDS));
+    // Counter observerTestCounter = registryManager.get().counter("observerTestCounter");
+    //
+    // final AtomicInteger calledCount = new AtomicInteger(0);
+    // final AtomicReference<MetricsData> latest = new AtomicReference<MetricsData>();
+    // metricsService.observe("clusterMetrics", "serviceC", new MetricsObserver() {
+    // @Override
+    // public void updated(MetricsData updated, MetricsData previous) {
+    // calledCount.incrementAndGet();
+    //
+    // latest.set(updated);
+    // synchronized (calledCount) {
+    // calledCount.notifyAll();
+    // }
+    //
+    // logger.debug(
+    // "*** OBSERVER (testObserver):  calledCount={}; updated.observerTestCounter={}; previous.observerTestCounter={}",
+    // calledCount.get(),
+    // updated != null ? (updated.getCounter("observerTestCounter") != null ? updated.getCounter(
+    // "observerTestCounter").getCount() : null)
+    // : null,
+    // previous != null ? (previous.getCounter("observerTestCounter") != null ? previous
+    // .getCounter("observerTestCounter").getCount() : null) : null);
+    // }
+    // });
+    //
+    // metricsService.scheduleExport("clusterMetrics", "serviceC", registryManager, 1, TimeUnit.SECONDS);
+    //
+    // // has not been updated yet
+    // assertTrue("calledCount should be 0, but is " + calledCount.get(), calledCount.get() == 0);
+    //
+    // // wait for update
+    // synchronized (calledCount) {
+    // calledCount.wait(metricsService.getAggregationIntervalMillis() * 4 + 5000);
+    // }
+    // assertTrue("Expected 1, got " + calledCount.get(), calledCount.get() >= 1);
+    //
+    // // force a change so observer will be called again
+    // long previousValue = observerTestCounter.getCount();
+    // observerTestCounter.inc();
+    //
+    // // wait for update
+    // synchronized (calledCount) {
+    // calledCount.wait(metricsService.getAggregationIntervalMillis() * 4 + 5000);
+    // }
+    // assertTrue("calledCount should be >1, but is " + calledCount.get(), calledCount.get() > 1);
+    // assertTrue("latest.observerTestCounter should be " + (previousValue + 1) + ", but is "
+    // + latest.get().getCounter("observerTestCounter").getCount(),
+    // latest.get().getCounter("observerTestCounter").getCount() == (previousValue + 1));
+    //
+    // }
+
     @Test
     public void testObserver() throws Exception {
         presenceService.waitUntilAvailable("clusterMetrics", "serviceC", 30000);
@@ -53,21 +110,25 @@ public class MetricsServiceTest {
         metricsService.observe("clusterMetrics", "serviceC", new MetricsObserver() {
             @Override
             public void updated(MetricsData updated, MetricsData previous) {
-                calledCount.incrementAndGet();
+
+                // only count updates, not created
+                if (previous != null) {
+                    calledCount.incrementAndGet();
+                }
+
+                if (updated.getCounter("observerTestCounter") != null
+                        && previous.getCounter("observerTestCounter") != null) {
+                    logger.debug(
+                            "*** OBSERVER (testObserver):  calledCount={}; updated.observerTestCounter={}; previous.observerTestCounter={}",
+                            calledCount.get(), updated != null ? updated.getCounter("observerTestCounter").getCount()
+                                    : null,
+                            previous != null ? previous.getCounter("observerTestCounter").getCount() : null);
+                }
 
                 latest.set(updated);
                 synchronized (calledCount) {
                     calledCount.notifyAll();
                 }
-
-                logger.debug(
-                        "*** OBSERVER (testObserver):  calledCount={}; updated.observerTestCounter={}; previous.observerTestCounter={}",
-                        calledCount.get(),
-                        updated != null ? (updated.getCounter("observerTestCounter") != null ? updated.getCounter(
-                                "observerTestCounter").getCount() : null)
-                                : null,
-                        previous != null ? (previous.getCounter("observerTestCounter") != null ? previous
-                                .getCounter("observerTestCounter").getCount() : null) : null);
             }
         });
 
@@ -78,9 +139,11 @@ public class MetricsServiceTest {
 
         // wait for update
         synchronized (calledCount) {
-            calledCount.wait(metricsService.getAggregationIntervalMillis() * 4 + 5000);
+            for (int i = 0; i < 40 && calledCount.get() == 0; i++) {
+                calledCount.wait(metricsService.getAggregationIntervalMillis() / 4);
+            }
         }
-        assertTrue("Expected 1, got " + calledCount.get(), calledCount.get() >= 1);
+        assertTrue("Expected >=1, got " + calledCount.get(), calledCount.get() >= 1);
 
         // force a change so observer will be called again
         long previousValue = observerTestCounter.getCount();
@@ -88,11 +151,15 @@ public class MetricsServiceTest {
 
         // wait for update
         synchronized (calledCount) {
-            calledCount.wait(metricsService.getAggregationIntervalMillis() * 4 + 5000);
+            for (int i = 0; i < 40
+                    && (latest.get().getCounter("observerTestCounter") == null || latest.get()
+                            .getCounter("observerTestCounter").getCount() == 0); i++) {
+                calledCount.wait(metricsService.getAggregationIntervalMillis() / 4);
+            }
         }
         assertTrue("calledCount should be >1, but is " + calledCount.get(), calledCount.get() > 1);
         assertTrue("latest.observerTestCounter should be " + (previousValue + 1) + ", but is "
-                + latest.get().getCounter("observerTestCounter").getCount(),
+                + latest.get().getCounter("observerTestCounter").getCount() + "; calledCount=" + calledCount.get(),
                 latest.get().getCounter("observerTestCounter").getCount() == (previousValue + 1));
 
     }
@@ -213,6 +280,9 @@ public class MetricsServiceTest {
         assertTrue(gauge1.getValue() == 1.0);
         assertTrue(gauge2.getValue() == 2.0);
 
+        GaugeData<Integer> gaugeNoMergeFunction = metricsData.getGauge("gaugeNoMergeFunction");
+        assertTrue("gauges without merge functions should not be exported", gaugeNoMergeFunction == null);
+
         // meters
         MeterData meter1 = metricsData.getMeter("meter1");
         MeterData meter2 = metricsData.getMeter("meter2");
@@ -271,6 +341,9 @@ public class MetricsServiceTest {
         assertTrue(gauge1.getValue() == 1.0);
         assertTrue(gauge2.getValue() == 2.0);
 
+        GaugeData<Integer> gaugeNoMergeFunction = metricsData.getGauge("gaugeNoMergeFunction");
+        assertTrue("gauges without merge functions should not be exported", gaugeNoMergeFunction == null);
+
         // meters
         MeterData meter1 = metricsData.getMeter("meter1");
         MeterData meter2 = metricsData.getMeter("meter2");
@@ -312,25 +385,42 @@ public class MetricsServiceTest {
         counter2.inc(2);
 
         // gauges
-        Gauge<Integer> gauge1 = registryManager.get().register(MetricRegistry.name("gauge1"),
-                new Gauge<Integer>() {
+        MergeableGauge<Integer> gauge1 = registryManager.get().register(MetricRegistry.name("gauge1"),
+                new MergeableGauge<Integer>() {
                     @Override
                     public Integer getValue() {
                         return 1;
                     }
 
+                    @Override
+                    public MergeFunction<GaugeData<Integer>> getMergeFunction() {
+                        return new AvgMergeFunction<Integer>();
+                    }
                 });
-        Gauge<Integer> gauge2 = registryManager.get().register(MetricRegistry.name("gauge2"),
-                new Gauge<Integer>() {
+        MergeableGauge<Integer> gauge2 = registryManager.get().register(MetricRegistry.name("gauge2"),
+                new MergeableGauge<Integer>() {
                     @Override
                     public Integer getValue() {
                         return 2;
                     }
 
+                    @Override
+                    public MergeFunction<GaugeData<Integer>> getMergeFunction() {
+                        return new AvgMergeFunction<Integer>();
+                    }
+
+                });
+        Gauge<Integer> gaugeNoMergeFunction = registryManager.get().register(
+                MetricRegistry.name("gaugeNoMergeFunction"),
+                new Gauge<Integer>() {
+                    @Override
+                    public Integer getValue() {
+                        return 3;
+                    }
                 });
 
-        registryManager.setGaugeMergeFunction("gauge1", new AvgMergeFunction<Integer>());
-        registryManager.setGaugeMergeFunction("gauge2", new AvgMergeFunction<Integer>());
+        // registryManager.setGaugeMergeFunction("gauge1", new AvgMergeFunction<Integer>());
+        // registryManager.setGaugeMergeFunction("gauge2", new AvgMergeFunction<Integer>());
 
         // meters
         Meter meter1 = registryManager.get().meter(MetricRegistry.name("meter1"));
