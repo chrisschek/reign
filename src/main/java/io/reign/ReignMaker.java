@@ -82,19 +82,6 @@ public class ReignMaker {
     private LifecycleEventHandler lifecycleEventHandler = Reign.NULL_LIFECYCLE_EVENT_HANDLER;
 
     private boolean findPortAutomatically = false;
-    
-    private Runnable startHook;
-    private Runnable stopHook;
-
-    public ReignMaker startHook(Runnable startHook) {
-        this.startHook = startHook;
-        return this;
-    }
-
-    public ReignMaker stopHook(Runnable stopHook) {
-        this.stopHook = stopHook;
-        return this;
-    }
 
     public ReignMaker lifecycleEventHandler(LifecycleEventHandler lifecycleEventHandler) {
         this.lifecycleEventHandler = lifecycleEventHandler;
@@ -351,8 +338,6 @@ public class ReignMaker {
         // build
         s = new Reign(zkClient, pathScheme, canonicalIdMaker, zkTestServer, lifecycleEventHandler);
         s.registerServices(serviceMap);
-        s.setStartHook(startHook);
-        s.setStopHook(stopHook);
 
         return s;
     }
