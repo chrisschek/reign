@@ -476,11 +476,8 @@ $(function() {
                 gaugeHtml += '<td>'+gaugeName+'</td>';
                 gaugeHtml += '<td>';
                 if (typeof(gauge.value) == "object") {
-                    var sortedObj = sortObject(gauge.value);
-                    for (var j = 0; j < Math.min(20, sortedObj.length); j++) {
-                        var key = sortedObj[j].key;
-                        var value = sortedObj[j].value;
-                        gaugeHtml += key+' : '+value+'<br/>';
+                    for (var key in gauge.value) {
+                        gaugeHtml += key + ' : ' + gauge.value[key] + '<br/>';
                     }
                 } else {
                     gaugeHtml += gauge.value;
@@ -494,21 +491,6 @@ $(function() {
                 $('#metrics-gauge-list').fadeIn('fast').removeClass('hidden');
             }
         }// gauges
-    }
-    
-    function sortObject(obj) {
-        var arr = [];
-        for (var prop in obj) {
-            if (obj.hasOwnProperty(prop)) {
-                arr.push({
-                    'key': prop,
-                    'value': obj[prop]
-                });
-            }
-        }
-        arr.sort(function(a, b) { return b.value - a.value; });
-        //arr.sort(function(a, b) { a.value.toLowerCase().localeCompare(b.value.toLowerCase()); }); //use this to sort as strings
-        return arr; // returns array
     }
 
 	function hideAllServiceData() {
