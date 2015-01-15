@@ -16,9 +16,6 @@
 
 package io.reign.metrics;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -32,9 +29,9 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 
 /**
- * 
+ *
  * @author ypai
- * 
+ *
  */
 public class StaticMetricRegistryManager implements MetricRegistryManager {
 
@@ -42,8 +39,6 @@ public class StaticMetricRegistryManager implements MetricRegistryManager {
 
     private final MetricRegistry metricRegistry;
     private final long lastRotatedTimestamp;
-
-    private Map<String, MergeFunction<?>> gaugeMergeFunctionMap = Collections.EMPTY_MAP;
 
     public StaticMetricRegistryManager() {
         this.metricRegistry = new MetricRegistry();
@@ -53,6 +48,11 @@ public class StaticMetricRegistryManager implements MetricRegistryManager {
     @Override
     public Counter counter(String name) {
         return this.metricRegistry.counter(name);
+    }
+
+    @Override
+    public Gauge gauge(String name) {
+        return this.metricRegistry.getGauges().get(name);
     }
 
     @Override
@@ -114,50 +114,6 @@ public class StaticMetricRegistryManager implements MetricRegistryManager {
     @Override
     public void removeAllCallbacks() {
         throw new UnsupportedOperationException("Not supported!");
-    }
-
-    @Override
-    public MergeFunction<?> getGaugeMergeFunction(String gaugeName) {
-        return gaugeMergeFunctionMap.get(gaugeName);
-    }
-
-    @Override
-    public void setGaugeMergeFunction(String gaugeName, MergeFunction<?> mergeFunction) {
-        synchronized (gaugeMergeFunctionMap) {
-            if (gaugeMergeFunctionMap == Collections.EMPTY_MAP) {
-                gaugeMergeFunctionMap = new HashMap<String, MergeFunction<?>>();
-
-                synchronized (gaugeMergeFunctionMap) {
-                    if (gaugeMergeFunctionMap.containsKey(gaugeName)) {
-                        return;
-                    }
-                    gaugeMergeFunctionMap.put(gaugeName, mergeFunction);
-                }
-            } else {
-                if (gaugeMergeFunctionMap.containsKey(gaugeName)) {
-                    return;
-                }
-                gaugeMergeFunctionMap.put(gaugeName, mergeFunction);
-            }
-        }
-
-    }
-
-    @Override
-    public void removeGaugeMergeFunction(String gaugeName) {
-        synchronized (gaugeMergeFunctionMap) {
-            if (gaugeMergeFunctionMap == Collections.EMPTY_MAP) {
-                return;
-            }
-            gaugeMergeFunctionMap.remove(gaugeName);
-        }
-    }
-
-    @Override
-    public void removeAllGaugeMergeFunctions() {
-        synchronized (gaugeMergeFunctionMap) {
-            gaugeMergeFunctionMap = Collections.EMPTY_MAP;
-        }
     }
 
 }

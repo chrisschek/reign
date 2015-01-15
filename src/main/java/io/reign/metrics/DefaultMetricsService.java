@@ -1,11 +1,11 @@
 /*
  * Copyright 2013 Yen Pai ypai@reign.io
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
@@ -55,12 +55,13 @@ import org.codehaus.jackson.map.exc.UnrecognizedPropertyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 
 /**
- * 
+ *
  * @author ypai
- * 
+ *
  */
 public class DefaultMetricsService extends AbstractService implements MetricsService {
 
@@ -639,8 +640,10 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
                 Collections.sort(memberServiceIds);
                 for (int i = 0; i < memberServiceIds.size(); i++) {
                     String serviceId = memberServiceIds.get(i);
+                    int serviceNodeCount = presenceService.getServiceInfo(clusterId, serviceId).getNodeIdList().size();
 
-                    logger.trace("Finding data nodes:  clusterId={}; serviceId={}", clusterId, serviceId);
+                    logger.trace("Finding data nodes:  clusterId={}; serviceId={}; serviceNodeCount={}", clusterId,
+                            serviceId, serviceNodeCount);
 
                     // get lock for a service
                     DistributedLock lock = coordinationService.getLock("reign", "metrics-" + clusterId + "-"
@@ -807,12 +810,15 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
                             for (String key : gaugeMap.keySet()) {
                                 List<GaugeData> gaugeList = gaugeMap.get(key);
                                 if (gaugeList != null && gaugeList.size() > 0) {
-                                    MergeFunction mergeFunction = registryManager.getGaugeMergeFunction(key);
-                                    logger.debug("GAUGE MERGE:  gauge={}; mergeFunction={}", key, mergeFunction);
-                                    if (mergeFunction != null) {
-                                        GaugeData gaugeData = (GaugeData) mergeFunction.merge(gaugeList);
-                                        if (gaugeData != null) {
-                                            gauges.put(key, gaugeData);
+                                    Gauge gauge = registryManager.gauge(key);
+                                    if (gauge instanceof MergeableGauge) {
+                                        MergeFunction mergeFunction = ((MergeableGauge) gauge).getMergeFunction();
+                                        logger.debug("GAUGE MERGE:  gauge={}; mergeFunction={}", key, mergeFunction);
+                                        if (mergeFunction != null) {
+                                            GaugeData gaugeData = (GaugeData) mergeFunction.merge(gaugeList);
+                                            if (gaugeData != null) {
+                                                gauges.put(key, gaugeData);
+                                            }
                                         }
                                     }
                                 }
@@ -848,6 +854,14 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
                             // }
                             if (meterList != null && meterList.size() > 0) {
                                 MeterData meterData = meterMergeFunction.merge(meterList);
+
+                                // special treatment for meters to multiply weighted avg. by number of nodes to estimate
+                                // meter numbers across service
+                                meterData.setMeanRate(meterData.getMeanRate() * serviceNodeCount);
+                                meterData.setM1Rate(meterData.getM1Rate() * serviceNodeCount);
+                                meterData.setM5Rate(meterData.getM5Rate() * serviceNodeCount);
+                                meterData.setM15Rate(meterData.getM15Rate() * serviceNodeCount);
+
                                 meters.put(key, meterData);
                             }
                         }

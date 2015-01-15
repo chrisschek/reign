@@ -1,11 +1,11 @@
 /*
  * Copyright 2013, 2014 Yen Pai ypai@kompany.org
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
@@ -43,9 +43,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Entry point into framework functionality.
- * 
+ *
  * @author ypai
- * 
+ *
  */
 public class Reign implements Watcher {
 
@@ -234,6 +234,11 @@ public class Reign implements Watcher {
 
         logger.info("START:  begin");
 
+        /** run before start hook **/
+        logger.info("START:  invoking lifecycleEventHandler.beforeStart():  {}", lifecycleEventHandler.getClass()
+                .getName());
+        lifecycleEventHandler.starting();
+
         /** create graceful shutdown hook **/
         logger.info("START:  add shutdown hook");
         Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -355,9 +360,10 @@ public class Reign implements Watcher {
 
         logger.info("START:  DONE");
 
-        /** run start hook **/
-        logger.info("START:  invoking lifecycleEventHandler:  {}", lifecycleEventHandler.getClass().getName());
-        lifecycleEventHandler.onStart(getContext());
+        /** run after start hook **/
+        logger.info("START:  invoking lifecycleEventHandler.afterStart():  {}", lifecycleEventHandler.getClass()
+                .getName());
+        lifecycleEventHandler.started(getContext());
 
         /** announce as a Reign Server: must be done after all other start-up tasks are complete **/
         PresenceService presenceService = context.getService("presence");
@@ -380,9 +386,10 @@ public class Reign implements Watcher {
 
         logger.info("STOP:  begin");
 
-        /** run stop hook **/
-        logger.info("STOP:  invoking lifecycleEventHandler:  {}", lifecycleEventHandler.getClass().getName());
-        lifecycleEventHandler.onStop(getContext());
+        /** run before stop hook **/
+        logger.info("STOP:  invoking lifecycleEventHandler.beforeStop():  {}", lifecycleEventHandler.getClass()
+                .getName());
+        lifecycleEventHandler.stopping(getContext());
 
         /** clean up services **/
         logger.info("STOP:  cleaning up services");
@@ -407,6 +414,11 @@ public class Reign implements Watcher {
                 logger.error("STOP:  error shutting down test ZooKeeper:  " + e, e);
             }
         }
+
+        /** run after stop hook **/
+        logger.info("STOP:  invoking lifecycleEventHandler.afterStop():  {}", lifecycleEventHandler.getClass()
+                .getName());
+        lifecycleEventHandler.stopped();
 
         logger.info("STOP:  DONE");
 
@@ -455,9 +467,9 @@ public class Reign implements Watcher {
 
     /**
      * Convenience wrapper providing methods for interpreting service metadata.
-     * 
+     *
      * @author ypai
-     * 
+     *
      */
     private static class ServiceWrapper {
         private final Service service;

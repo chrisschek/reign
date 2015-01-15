@@ -104,10 +104,15 @@ public class ZkMetricsReporterTest {
     public void testSingleGauge() throws Exception {
         try {
             StaticMetricRegistryManager registryManager = new StaticMetricRegistryManager();
-            Gauge<Integer> gauge = registryManager.get().register("test", new Gauge<Integer>() {
+            Gauge<Integer> gauge = registryManager.get().register("test", new MergeableGauge<Integer>() {
                 @Override
                 public Integer getValue() {
                     return 1;
+                }
+
+                @Override
+                public MergeFunction<GaugeData<Integer>> getMergeFunction() {
+                    return new AvgMergeFunction<Integer>();
                 }
             });
 
@@ -215,10 +220,15 @@ public class ZkMetricsReporterTest {
     public void testSingleGaugeSingleMeter() throws Exception {
         try {
             StaticMetricRegistryManager registryManager = new StaticMetricRegistryManager();
-            Gauge<Integer> gauge = registryManager.get().register("testGauge", new Gauge<Integer>() {
+            Gauge<Integer> gauge = registryManager.get().register("testGauge", new MergeableGauge<Integer>() {
                 @Override
                 public Integer getValue() {
                     return 1;
+                }
+
+                @Override
+                public MergeFunction<GaugeData<Integer>> getMergeFunction() {
+                    return new AvgMergeFunction<Integer>();
                 }
             });
             Meter meter = registryManager.get().meter("testMeter");
@@ -251,10 +261,15 @@ public class ZkMetricsReporterTest {
             StaticMetricRegistryManager registryManager = new StaticMetricRegistryManager();
             Counter counter = registryManager.get().counter("testCounter");
             counter.inc();
-            Gauge<Integer> gauge = registryManager.get().register("testGauge", new Gauge<Integer>() {
+            Gauge<Integer> gauge = registryManager.get().register("testGauge", new MergeableGauge<Integer>() {
                 @Override
                 public Integer getValue() {
                     return 1;
+                }
+
+                @Override
+                public MergeFunction<GaugeData<Integer>> getMergeFunction() {
+                    return new AvgMergeFunction<Integer>();
                 }
             });
 

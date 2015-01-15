@@ -42,15 +42,17 @@ public interface MetricRegistryManager {
 
     public Gauge gauge(String name, Gauge gauge);
 
+    public Gauge gauge(String name);
+
     public MetricRegistry get();
 
-    public void setGaugeMergeFunction(String gaugeName, MergeFunction<?> mergeFunction);
-
-    public void removeGaugeMergeFunction(String gaugeName);
-
-    public void removeAllGaugeMergeFunctions();
-
-    public MergeFunction<?> getGaugeMergeFunction(String gaugeName);
+    // public void setGaugeMergeFunction(String gaugeName, MergeFunction<?> mergeFunction);
+    //
+    // public void removeGaugeMergeFunction(String gaugeName);
+    //
+    // public void removeAllGaugeMergeFunctions();
+    //
+    // public MergeFunction<?> getGaugeMergeFunction(String gaugeName);
 
     /**
      * 
