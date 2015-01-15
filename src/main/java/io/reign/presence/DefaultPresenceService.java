@@ -1,11 +1,11 @@
 /*
  * Copyright 2013 Yen Pai ypai@reign.io
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
@@ -58,9 +58,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Service discovery service.
- * 
+ *
  * @author ypai
- * 
+ *
  */
 public class DefaultPresenceService extends AbstractService implements PresenceService {
 
@@ -522,7 +522,6 @@ public class DefaultPresenceService extends AbstractService implements PresenceS
         // get announcement using path to node
         String nodePath = getPathScheme().joinTokens(clusterId, serviceId, nodeId);
         Announcement announcement = this.getAnnouncement(nodePath, getContext().getDefaultZkAclList());
-        announcement.setNodeAttributeSerializer(nodeAttributeSerializer);
 
         // update announcement if node data is different
         ServiceNodeInfo nodeInfo = new StaticServiceNodeInfo(clusterId, serviceId, nodeId, attributeMap);
@@ -563,9 +562,9 @@ public class DefaultPresenceService extends AbstractService implements PresenceS
 
     /**
      * Used to flag that a service node is dead, the presence node should be removed, and should not be checked again.
-     * 
+     *
      * Used internally to remove connected clients once ping(s) fail.
-     * 
+     *
      * @param clusterId
      * @param serviceId
      * @param nodeId
@@ -611,7 +610,7 @@ public class DefaultPresenceService extends AbstractService implements PresenceS
     }
 
     /**
-     * 
+     *
      * @param nodePath
      * @param aclList
      *            if null, will not create new Announcement if one does not currently exist
@@ -857,7 +856,7 @@ public class DefaultPresenceService extends AbstractService implements PresenceS
             Map<String, String> attributeMap = announcement.getNodeInfo().getAttributeMap();
             byte[] leafData = null;
             if (attributeMap.size() > 0) {
-                leafData = announcement.getNodeAttributeSerializer().serialize(attributeMap);
+                leafData = nodeAttributeSerializer.serialize(attributeMap);
             }
             String pathUpdated = zkClientUtil.updatePath(getZkClient(), getPathScheme(), path, leafData,
                     announcement.getAclList(), CreateMode.EPHEMERAL, -1);

@@ -16,65 +16,55 @@
 
 package io.reign.presence;
 
-import io.reign.DataSerializer;
 import io.reign.ServiceNodeInfo;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.zookeeper.data.ACL;
 
 /**
- * 
+ *
  * @author ypai
- * 
+ *
  */
 public class Announcement {
 
-	private volatile boolean hidden = true;
-	private volatile ServiceNodeInfo nodeInfo;
-	private volatile List<ACL> aclList;
-	private volatile DataSerializer<Map<String, String>> nodeAttributeSerializer;
-	private volatile long lastUpdated;
+    private volatile boolean hidden = true;
+    private volatile ServiceNodeInfo nodeInfo;
+    private volatile List<ACL> aclList;
 
-	public ServiceNodeInfo getNodeInfo() {
-		return nodeInfo;
-	}
+    private volatile long lastUpdated;
 
-	public void setNodeInfo(ServiceNodeInfo nodeInfo) {
-		this.nodeInfo = nodeInfo;
-	}
+    public ServiceNodeInfo getNodeInfo() {
+        return nodeInfo;
+    }
 
-	public boolean isHidden() {
-		return hidden;
-	}
+    public void setNodeInfo(ServiceNodeInfo nodeInfo) {
+        this.nodeInfo = nodeInfo;
+    }
 
-	public void setHidden(boolean hidden) {
-		this.hidden = hidden;
-	}
+    public boolean isHidden() {
+        return hidden;
+    }
 
-	public List<ACL> getAclList() {
-		return aclList;
-	}
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
+    }
 
-	public void setAclList(List<ACL> aclList) {
-		this.aclList = aclList;
-	}
+    public List<ACL> getAclList() {
+        return aclList;
+    }
 
-	public DataSerializer<Map<String, String>> getNodeAttributeSerializer() {
-		return nodeAttributeSerializer;
-	}
+    public void setAclList(List<ACL> aclList) {
+        this.aclList = aclList;
+    }
 
-	public void setNodeAttributeSerializer(DataSerializer<Map<String, String>> nodeAttributeSerializer) {
-		this.nodeAttributeSerializer = nodeAttributeSerializer;
-	}
+    public long getLastUpdated() {
+        return lastUpdated;
+    }
 
-	public long getLastUpdated() {
-		return lastUpdated;
-	}
-
-	public void setLastUpdated(long lastUpdated) {
-		this.lastUpdated = lastUpdated;
-	}
+    public void setLastUpdated(long lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
 
 }
