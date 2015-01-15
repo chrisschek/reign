@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.clearspring.analytics.stream.ConcurrentStreamSummary;
 import com.clearspring.analytics.stream.ScoredItem;
-import com.codahale.metrics.Gauge;
 
 /**
  * 
@@ -13,26 +12,26 @@ import com.codahale.metrics.Gauge;
  *
  */
 public class TopKGauge implements MergeableGauge<Map<String, Integer>> {
-    
+
     private final static int streamSummaryCapacity = 1000;
-    
+
     private int k;
     private ConcurrentStreamSummary<String> streamSummary;
-    
+
     public TopKGauge() {
-        k = 10;
+        this.k = 10;
         streamSummary = new ConcurrentStreamSummary<String>(streamSummaryCapacity);
     }
-    
+
     public TopKGauge(int k) {
         this.k = k;
         streamSummary = new ConcurrentStreamSummary<String>(streamSummaryCapacity);
     }
-    
+
     public void offer(String element) {
         streamSummary.offer(element);
     }
-    
+
     @Override
     public Map<String, Integer> getValue() {
         Map<String, Integer> topK = new HashMap<String, Integer>();
