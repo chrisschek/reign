@@ -41,6 +41,13 @@
 	</properties>
 
 	<dependencies>
+	
+		<!-- Stream Counting  -->
+		<dependency>
+  			<groupId>com.clearspring.analytics</groupId>
+  			<artifactId>stream</artifactId>
+  			<version>2.7.0</version>
+		</dependency>
 
         <!-- reactive Java extensions -->
 		<dependency>

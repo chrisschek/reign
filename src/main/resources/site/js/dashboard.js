@@ -462,7 +462,43 @@ $(function() {
               $('#metrics-timer-list').fadeIn('fast').removeClass('hidden');
 			}
 		}// timers
-	}
+
+        // gauges
+        if( metrics.gauges ) {
+            var gauges = metrics.gauges;
+            var gaugeHtml = '';
+            var count = 0;
+            var metricKeyList = sortedKeyList(gauges);
+            for(var i = 0; i < metricKeyList.length; i++) {		
+                var gaugeName = metricKeyList[i];
+                var gauge = gauges[gaugeName];
+                gaugeHtml += '<tr id="'+gaugeName+'" class="metric-data">';
+                gaugeHtml += '<td>'+gaugeName+'</td>';
+                if (typeof(gauge.value) == "object") {
+                    gaugeHtml += '<td>';
+                    for (var key in gauge.value) {
+                        gaugeHtml += key + '<br/>';
+                    }
+                    gaugeHtml += '</td>';
+                    gaugeHtml += '<td>';
+                    for (var key in gauge.value) {
+                        gaugeHtml += gauge.value[key] + '<br/>';
+                    }
+                    gaugeHtml += '</td>';
+                } else {
+                    gaugeHtml += '<td colspan="2">';
+                    gaugeHtml += gauge.value;
+                    gaugeHtml += '</td>';
+                }
+                gaugeHtml += '</tr>';
+                count++;
+			}
+            if( count>0 ) {
+                $('#metrics-gauge-list-data').html(gaugeHtml);
+                $('#metrics-gauge-list').fadeIn('fast').removeClass('hidden');
+            }
+        }// gauges
+    }
 
 	function hideAllServiceData() {
 		$('.metric-list').hide();
