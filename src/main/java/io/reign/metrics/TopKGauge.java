@@ -12,7 +12,7 @@ import com.codahale.metrics.Gauge;
  * @author mxing
  *
  */
-public class TopKGauge implements Gauge<Map<String, Integer>> {
+public class TopKGauge implements MergeableGauge<Map<String, Integer>> {
     
     private final static int streamSummaryCapacity = 1000;
     
@@ -40,5 +40,10 @@ public class TopKGauge implements Gauge<Map<String, Integer>> {
             topK.put(score.getItem(), (int) score.getCount());
         }
         return topK;
-    }    
+    }
+
+    @Override
+    public MergeFunction<GaugeData<Map<String, Integer>>> getMergeFunction() {
+        return new CounterMapMergeFunction(30);
+    }
 }
