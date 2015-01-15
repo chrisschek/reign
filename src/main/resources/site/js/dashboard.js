@@ -474,15 +474,22 @@ $(function() {
                 var gauge = gauges[gaugeName];
                 gaugeHtml += '<tr id="'+gaugeName+'" class="metric-data">';
                 gaugeHtml += '<td>'+gaugeName+'</td>';
-                gaugeHtml += '<td>';
                 if (typeof(gauge.value) == "object") {
+                    gaugeHtml += '<td>';
                     for (var key in gauge.value) {
-                        gaugeHtml += key + ' : ' + gauge.value[key] + '<br/>';
+                        gaugeHtml += key + '<br/>';
                     }
+                    gaugeHtml += '</td>';
+                    gaugeHtml += '<td>';
+                    for (var key in gauge.value) {
+                        gaugeHtml += gauge.value[key] + '<br/>';
+                    }
+                    gaugeHtml += '</td>';
                 } else {
+                    gaugeHtml += '<td colspan="2">';
                     gaugeHtml += gauge.value;
+                    gaugeHtml += '</td>';
                 }
-                gaugeHtml += '</td>';
                 gaugeHtml += '</tr>';
                 count++;
 			}

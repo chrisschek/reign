@@ -18,9 +18,17 @@ import com.google.common.primitives.Ints;
  * @author ypai
  *
  */
-public class ListCountersMergeFunction implements MergeFunction<GaugeData<Map<String, Integer>>> {
+public class CounterMapMergeFunction implements MergeFunction<GaugeData<Map<String, Integer>>> {
+        
+    private int maxCounters;
     
-    private final static int maxCounters = 30;
+    public CounterMapMergeFunction() {
+        this.maxCounters = 10;
+    }
+    
+    public CounterMapMergeFunction(int maxCounters) {
+        this.maxCounters = maxCounters;
+    }
 
     @Override
     public GaugeData<Map<String, Integer>> merge(List<GaugeData<Map<String, Integer>>> dataList) {
