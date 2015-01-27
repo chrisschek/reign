@@ -7,11 +7,11 @@ import com.clearspring.analytics.stream.ConcurrentStreamSummary;
 import com.clearspring.analytics.stream.ScoredItem;
 
 /**
- * 
+ *
  * @author mxing
  *
  */
-public class TopKGauge implements MergeableGauge<Map<String, Integer>> {
+public class TopKGauge implements MergeableGauge<Map<String, Integer>, Map<String, Integer>> {
 
     private int k;
     private ConcurrentStreamSummary<String> streamSummary;
@@ -40,7 +40,7 @@ public class TopKGauge implements MergeableGauge<Map<String, Integer>> {
     }
 
     @Override
-    public MergeFunction<GaugeData<Map<String, Integer>>> getMergeFunction() {
+    public MergeFunction<GaugeData<Map<String, Integer>>, GaugeData<Map<String, Integer>>> getMergeFunction() {
         return new CounterMapMergeFunction(30);
     }
 }

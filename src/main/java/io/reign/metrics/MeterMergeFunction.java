@@ -2,7 +2,7 @@ package io.reign.metrics;
 
 import java.util.List;
 
-public class MeterMergeFunction implements MergeFunction<MeterData> {
+public class MeterMergeFunction implements MergeFunction<MeterData, MeterData> {
 
     @Override
     public MeterData merge(List<MeterData> dataList) {

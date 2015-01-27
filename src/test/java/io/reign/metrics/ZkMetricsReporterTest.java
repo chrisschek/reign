@@ -104,14 +104,14 @@ public class ZkMetricsReporterTest {
     public void testSingleGauge() throws Exception {
         try {
             StaticMetricRegistryManager registryManager = new StaticMetricRegistryManager();
-            Gauge<Integer> gauge = registryManager.get().register("test", new MergeableGauge<Integer>() {
+            Gauge<Integer> gauge = registryManager.get().register("test", new MergeableGauge<Integer, Integer>() {
                 @Override
                 public Integer getValue() {
                     return 1;
                 }
 
                 @Override
-                public MergeFunction<GaugeData<Integer>> getMergeFunction() {
+                public MergeFunction<GaugeData<Integer>, GaugeData<Integer>> getMergeFunction() {
                     return new AvgMergeFunction<Integer>();
                 }
             });
@@ -220,14 +220,14 @@ public class ZkMetricsReporterTest {
     public void testSingleGaugeSingleMeter() throws Exception {
         try {
             StaticMetricRegistryManager registryManager = new StaticMetricRegistryManager();
-            Gauge<Integer> gauge = registryManager.get().register("testGauge", new MergeableGauge<Integer>() {
+            Gauge<Integer> gauge = registryManager.get().register("testGauge", new MergeableGauge<Integer, Integer>() {
                 @Override
                 public Integer getValue() {
                     return 1;
                 }
 
                 @Override
-                public MergeFunction<GaugeData<Integer>> getMergeFunction() {
+                public MergeFunction<GaugeData<Integer>, GaugeData<Integer>> getMergeFunction() {
                     return new AvgMergeFunction<Integer>();
                 }
             });
@@ -261,14 +261,14 @@ public class ZkMetricsReporterTest {
             StaticMetricRegistryManager registryManager = new StaticMetricRegistryManager();
             Counter counter = registryManager.get().counter("testCounter");
             counter.inc();
-            Gauge<Integer> gauge = registryManager.get().register("testGauge", new MergeableGauge<Integer>() {
+            Gauge<Integer> gauge = registryManager.get().register("testGauge", new MergeableGauge<Integer, Integer>() {
                 @Override
                 public Integer getValue() {
                     return 1;
                 }
 
                 @Override
-                public MergeFunction<GaugeData<Integer>> getMergeFunction() {
+                public MergeFunction<GaugeData<Integer>, GaugeData<Integer>> getMergeFunction() {
                     return new AvgMergeFunction<Integer>();
                 }
             });

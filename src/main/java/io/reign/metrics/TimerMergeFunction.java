@@ -2,7 +2,7 @@ package io.reign.metrics;
 
 import java.util.List;
 
-public class TimerMergeFunction implements MergeFunction<TimerData> {
+public class TimerMergeFunction implements MergeFunction<TimerData, TimerData> {
 
     @Override
     public TimerData merge(List<TimerData> dataList) {
