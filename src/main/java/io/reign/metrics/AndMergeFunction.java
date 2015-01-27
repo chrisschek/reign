@@ -3,11 +3,11 @@ package io.reign.metrics;
 import java.util.List;
 
 /**
- * 
+ *
  * @author ypai
  *
  */
-public class AndMergeFunction implements MergeFunction<GaugeData<Boolean>> {
+public class AndMergeFunction implements MergeFunction<GaugeData<Boolean>, GaugeData<Boolean>> {
 
     private boolean defaultValue = false;
 

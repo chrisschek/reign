@@ -2,7 +2,7 @@ package io.reign.metrics;
 
 import java.util.List;
 
-public class CounterMergeFunction implements MergeFunction<CounterData> {
+public class CounterMergeFunction implements MergeFunction<CounterData, CounterData> {
 
     @Override
     public CounterData merge(List<CounterData> dataList) {

@@ -2,7 +2,7 @@ package io.reign.metrics;
 
 import java.util.List;
 
-public class HistogramMergeFunction implements MergeFunction<HistogramData> {
+public class HistogramMergeFunction implements MergeFunction<HistogramData, HistogramData> {
 
     @Override
     public HistogramData merge(List<HistogramData> dataList) {

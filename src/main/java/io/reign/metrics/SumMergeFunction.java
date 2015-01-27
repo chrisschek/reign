@@ -3,11 +3,11 @@ package io.reign.metrics;
 import java.util.List;
 
 /**
- * 
+ *
  * @author ypai
  *
  */
-public class SumMergeFunction<T extends Number> implements MergeFunction<GaugeData<T>> {
+public class SumMergeFunction<T extends Number> implements MergeFunction<GaugeData<T>, GaugeData<T>> {
 
     @Override
     public GaugeData<T> merge(List<GaugeData<T>> dataList) {

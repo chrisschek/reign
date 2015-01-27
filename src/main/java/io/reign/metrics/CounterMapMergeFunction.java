@@ -10,11 +10,12 @@ import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
 
 /**
- * 
+ *
  * @author mxing
  *
  */
-public class CounterMapMergeFunction implements MergeFunction<GaugeData<Map<String, Integer>>> {
+public class CounterMapMergeFunction implements
+        MergeFunction<GaugeData<Map<String, Integer>>, GaugeData<Map<String, Integer>>> {
 
     private int maxCounters;
 

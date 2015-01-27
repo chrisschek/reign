@@ -385,27 +385,27 @@ public class MetricsServiceTest {
         counter2.inc(2);
 
         // gauges
-        MergeableGauge<Integer> gauge1 = registryManager.get().register(MetricRegistry.name("gauge1"),
-                new MergeableGauge<Integer>() {
+        MergeableGauge<Integer, Integer> gauge1 = registryManager.get().register(MetricRegistry.name("gauge1"),
+                new MergeableGauge<Integer, Integer>() {
                     @Override
                     public Integer getValue() {
                         return 1;
                     }
 
                     @Override
-                    public MergeFunction<GaugeData<Integer>> getMergeFunction() {
+                    public MergeFunction<GaugeData<Integer>, GaugeData<Integer>> getMergeFunction() {
                         return new AvgMergeFunction<Integer>();
                     }
                 });
-        MergeableGauge<Integer> gauge2 = registryManager.get().register(MetricRegistry.name("gauge2"),
-                new MergeableGauge<Integer>() {
+        MergeableGauge<Integer, Integer> gauge2 = registryManager.get().register(MetricRegistry.name("gauge2"),
+                new MergeableGauge<Integer, Integer>() {
                     @Override
                     public Integer getValue() {
                         return 2;
                     }
 
                     @Override
-                    public MergeFunction<GaugeData<Integer>> getMergeFunction() {
+                    public MergeFunction<GaugeData<Integer>, GaugeData<Integer>> getMergeFunction() {
                         return new AvgMergeFunction<Integer>();
                     }
 
