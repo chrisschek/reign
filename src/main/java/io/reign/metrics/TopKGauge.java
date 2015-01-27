@@ -13,19 +13,17 @@ import com.clearspring.analytics.stream.ScoredItem;
  */
 public class TopKGauge implements MergeableGauge<Map<String, Integer>> {
 
-    private final static int streamSummaryCapacity = 1000;
-
     private int k;
     private ConcurrentStreamSummary<String> streamSummary;
 
     public TopKGauge() {
         this.k = 10;
-        streamSummary = new ConcurrentStreamSummary<String>(streamSummaryCapacity);
+        streamSummary = new ConcurrentStreamSummary<String>(1000);
     }
 
-    public TopKGauge(int k) {
+    public TopKGauge(int k, int capacity) {
         this.k = k;
-        streamSummary = new ConcurrentStreamSummary<String>(streamSummaryCapacity);
+        streamSummary = new ConcurrentStreamSummary<String>(capacity);
     }
 
     public void offer(String element) {
