@@ -214,13 +214,17 @@
 							<shadedClassifierName>shaded</shadedClassifierName>
 							<artifactSet>
 								<excludes>
-									<exclude>org.apache.zookeeper:zookeeper</exclude>
+									<!-- <exclude>org.apache.zookeeper:zookeeper</exclude> -->
 									<exclude>jline:*</exclude>
 									<exclude>ch.qos.logback:*</exclude>
 									<exclude>org.slf4j:*</exclude>
 								</excludes>
 							</artifactSet>
 							<relocations>
+                                                                <relocation>
+                                                                        <pattern>org.apache.zookeeper</pattern>
+                                                                        <shadedPattern>io.reign.org.apache.zookeeper</shadedPattern>
+                                                                </relocation>
                                                                 <relocation>
                                                                         <pattern>com.clearspring.analytics</pattern>
                                                                         <shadedPattern>io.reign.com.clearspring.analytics</shadedPattern>
