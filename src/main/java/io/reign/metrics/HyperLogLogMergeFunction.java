@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.clearspring.analytics.stream.cardinality.HyperLogLogPlus;
+import com.clearspring.analytics.stream.cardinality.ICardinality;
 
 public class HyperLogLogMergeFunction implements MergeFunction<GaugeData<String>, GaugeData<Long>> {
 
@@ -19,14 +20,14 @@ public class HyperLogLogMergeFunction implements MergeFunction<GaugeData<String>
         GaugeData<Long> gaugeData = new GaugeData<Long>(0l);
         try {
             Iterator<GaugeData<String>> iter = dataList.iterator();
-            HyperLogLogPlus hll = HLLEncoder.fromString(iter.next().getValue());
+            ICardinality hll = HLLEncoder.fromString(iter.next().getValue());
             while (iter.hasNext()) {
                 HyperLogLogPlus nextHll = HLLEncoder.fromString(iter.next().getValue());
-                hll.merge(nextHll);
+                hll = hll.merge(nextHll);
             }
             gaugeData = new GaugeData<Long>(hll.cardinality());
         } catch (Exception e) {
-            logger.debug("Exception {}", e);
+            logger.debug("Reign Metric Merge Exception {}", e);
         }
         return gaugeData;
     }

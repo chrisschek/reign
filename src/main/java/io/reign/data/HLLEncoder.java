@@ -25,7 +25,7 @@ public class HLLEncoder {
             ois.close();
             return (HyperLogLogPlus) o;
         } catch (Exception e) {
-            logger.debug("Exception: {}", e);
+            logger.debug("Exception while decoding HLL: {}", e);
             return null;
         }
     }
@@ -39,7 +39,7 @@ public class HLLEncoder {
             oos.close();
             return new String(BaseEncoding.base64().encode(baos.toByteArray()));
         } catch (Exception e) {
-            logger.debug("Exception: {}", e);
+            logger.debug("Exception while encoding HLL: {}", e);
             return "";
         }
     }
