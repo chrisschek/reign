@@ -14,5 +14,6 @@ docs/*.graffle
 DESIGN*
 ignore/**/*
 ignore
-
+.idea
+reign.iml
 /target
