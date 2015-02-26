@@ -81,11 +81,14 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
         public volatile MetricRegistryManager registryManager;
         public volatile Future future = null;
         public final ZkMetricsReporter metricsReporter;
+        private final long updateIntervalMillis;
 
-        public ExportMeta(String dataPath, MetricRegistryManager registryManager, ZkMetricsReporter metricsReporter) {
+        public ExportMeta(String dataPath, MetricRegistryManager registryManager, ZkMetricsReporter metricsReporter,
+                long updateIntervalMillis) {
             this.dataPath = dataPath;
             this.registryManager = registryManager;
             this.metricsReporter = metricsReporter;
+            this.updateIntervalMillis = updateIntervalMillis;
         }
     }
 
@@ -131,12 +134,15 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
     void scheduleExport(final String clusterId, final String serviceId, final String nodeId,
             final MetricRegistryManager registryManager, long updateInterval, TimeUnit updateIntervalTimeUnit) {
 
+        // determine runnable interval
+        final long updateIntervalSeconds = Math.max(1, updateIntervalTimeUnit.toSeconds(updateInterval));
+
         final String key = exportPathMapKey(clusterId, serviceId, nodeId);
         synchronized (exportPathMap) {
             if (!exportPathMap.containsKey(key)) {
                 final ZkMetricsReporter reporter = ZkMetricsReporter.builder().convertRatesTo(TimeUnit.SECONDS)
                         .convertDurationsTo(TimeUnit.MILLISECONDS).build();
-                ExportMeta exportMeta = new ExportMeta(null, registryManager, reporter);
+                ExportMeta exportMeta = new ExportMeta(null, registryManager, reporter, updateIntervalSeconds * 1000);
                 exportPathMap.put(key, exportMeta);
 
                 // TODO: fix below later, not as clean as could be:
@@ -150,12 +156,6 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
                 logger.info("Metrics export already scheduled:  {}", key);
                 return;
             }
-        }
-
-        // determine runnable interval
-        long updateIntervalSeconds = updateIntervalTimeUnit.toSeconds(updateInterval);
-        if (updateIntervalSeconds < 1) {
-            updateIntervalSeconds = 1;
         }
 
         // get export metadata for this key
@@ -602,6 +602,19 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
         return result;
     }
 
+    static List<MeterData> filterOldMeterData(List<MeterData> dataList, long nowMillis, long tooOldAgeMillis) {
+
+        for (int j = 0; j < dataList.size(); j++) {
+            MeterData meterData = dataList.get(j);
+            if (System.currentTimeMillis() - meterData.getLastUpdatedTimestamp() > tooOldAgeMillis) {
+                dataList.remove(j);
+                j--;
+            }
+        }
+        return dataList;
+
+    }
+
     public class AggregationRunnable implements Runnable {
         @Override
         public void run() {
@@ -757,6 +770,7 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
                             Map<String, MeterData> meters = metricsData.getMeters();
                             for (String key : meters.keySet()) {
                                 MeterData meter = meters.get(key);
+                                meter.setLastUpdatedTimestamp(metricsData.getLastUpdatedTimestamp());
                                 List<MeterData> meterList = meterMap.get(key);
                                 if (meterList == null) {
                                     meterList = new ArrayList<MeterData>(dataNodes.size());
@@ -853,6 +867,17 @@ public class DefaultMetricsService extends AbstractService implements MetricsSer
                             // meterList.size(), dataNodeCount);
                             // }
                             if (meterList != null && meterList.size() > 0) {
+                                // get "too old" threshold for meter data
+                                ExportMeta meterDataExportMeta = exportPathMap
+                                        .get(exportPathMapKey(clusterId, serviceId, getContext().getNodeId()));
+                                long tooOldAgeMillis = aggregationIntervalMillis * 2;
+                                if (meterDataExportMeta != null) {
+                                    tooOldAgeMillis = 2 * meterDataExportMeta.updateIntervalMillis;
+                                }
+
+                                // filter all meter data(s) that are more than 2x the update window
+                                meterList = filterOldMeterData(meterList, System.currentTimeMillis(), tooOldAgeMillis);
+
                                 MeterData meterData = meterMergeFunction.merge(meterList);
 
                                 // special treatment for meters to multiply weighted avg. by number of nodes to estimate
