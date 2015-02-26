@@ -1,7 +1,5 @@
 package io.reign.metrics;
 
-import io.reign.data.HLLEncoder;
-
 import java.util.Iterator;
 import java.util.List;
 

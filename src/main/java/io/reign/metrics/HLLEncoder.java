@@ -1,4 +1,4 @@
-package io.reign.data;
+package io.reign.metrics;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

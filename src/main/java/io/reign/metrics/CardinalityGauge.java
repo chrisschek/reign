@@ -1,7 +1,5 @@
 package io.reign.metrics;
 
-import io.reign.data.HLLEncoder;
-
 import com.clearspring.analytics.stream.cardinality.HyperLogLogPlus;
 
 public class CardinalityGauge implements MergeableGauge<String, Long> {
@@ -20,7 +18,7 @@ public class CardinalityGauge implements MergeableGauge<String, Long> {
         hll = new HyperLogLogPlus(p, sp);
     }
 
-    public void Offer(Object o) {
+    public void offer(Object o) {
         hll.offer(o);
     }
 
