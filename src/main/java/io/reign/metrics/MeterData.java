@@ -3,9 +3,9 @@ package io.reign.metrics;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 
+ *
  * @author ypai
- * 
+ *
  */
 public class MeterData {
 
@@ -20,6 +20,16 @@ public class MeterData {
     private double m15Rate;
 
     private TimeUnit rateUnit;
+
+    private long lastUpdatedTimestamp;
+
+    long getLastUpdatedTimestamp() {
+        return lastUpdatedTimestamp;
+    }
+
+    void setLastUpdatedTimestamp(long lastUpdatedTimestamp) {
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    }
 
     public long getCount() {
         return count;
