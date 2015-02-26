@@ -1,10 +1,13 @@
 package io.reign.metrics;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import io.reign.MasterTestSuite;
 import io.reign.presence.PresenceService;
 import io.reign.util.JacksonUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,62 +43,38 @@ public class MetricsServiceTest {
         presenceService.announce("clusterMetrics", "serviceD", true);
     }
 
-    // @Test
-    // public void testObserver() throws Exception {
-    // presenceService.waitUntilAvailable("clusterMetrics", "serviceC", 30000);
-    //
-    // MetricRegistryManager registryManager = getMetricRegistryManager(new RotatingMetricRegistryManager(300,
-    // TimeUnit.SECONDS));
-    // Counter observerTestCounter = registryManager.get().counter("observerTestCounter");
-    //
-    // final AtomicInteger calledCount = new AtomicInteger(0);
-    // final AtomicReference<MetricsData> latest = new AtomicReference<MetricsData>();
-    // metricsService.observe("clusterMetrics", "serviceC", new MetricsObserver() {
-    // @Override
-    // public void updated(MetricsData updated, MetricsData previous) {
-    // calledCount.incrementAndGet();
-    //
-    // latest.set(updated);
-    // synchronized (calledCount) {
-    // calledCount.notifyAll();
-    // }
-    //
-    // logger.debug(
-    // "*** OBSERVER (testObserver):  calledCount={}; updated.observerTestCounter={}; previous.observerTestCounter={}",
-    // calledCount.get(),
-    // updated != null ? (updated.getCounter("observerTestCounter") != null ? updated.getCounter(
-    // "observerTestCounter").getCount() : null)
-    // : null,
-    // previous != null ? (previous.getCounter("observerTestCounter") != null ? previous
-    // .getCounter("observerTestCounter").getCount() : null) : null);
-    // }
-    // });
-    //
-    // metricsService.scheduleExport("clusterMetrics", "serviceC", registryManager, 1, TimeUnit.SECONDS);
-    //
-    // // has not been updated yet
-    // assertTrue("calledCount should be 0, but is " + calledCount.get(), calledCount.get() == 0);
-    //
-    // // wait for update
-    // synchronized (calledCount) {
-    // calledCount.wait(metricsService.getAggregationIntervalMillis() * 4 + 5000);
-    // }
-    // assertTrue("Expected 1, got " + calledCount.get(), calledCount.get() >= 1);
-    //
-    // // force a change so observer will be called again
-    // long previousValue = observerTestCounter.getCount();
-    // observerTestCounter.inc();
-    //
-    // // wait for update
-    // synchronized (calledCount) {
-    // calledCount.wait(metricsService.getAggregationIntervalMillis() * 4 + 5000);
-    // }
-    // assertTrue("calledCount should be >1, but is " + calledCount.get(), calledCount.get() > 1);
-    // assertTrue("latest.observerTestCounter should be " + (previousValue + 1) + ", but is "
-    // + latest.get().getCounter("observerTestCounter").getCount(),
-    // latest.get().getCounter("observerTestCounter").getCount() == (previousValue + 1));
-    //
-    // }
+    @Test
+    public void testFilterOldMeterData() throws Exception {
+        long nowMillis = System.currentTimeMillis();
+
+        MeterData m1 = new MeterData();
+        MeterData m2 = new MeterData();
+        MeterData m3 = new MeterData();
+        MeterData m4 = new MeterData();
+        MeterData m5 = new MeterData();
+
+        m1.setLastUpdatedTimestamp(nowMillis - 10000);
+        m2.setLastUpdatedTimestamp(nowMillis - 20000);
+        m3.setLastUpdatedTimestamp(nowMillis - 30000);
+        m4.setLastUpdatedTimestamp(nowMillis - 40000);
+        m5.setLastUpdatedTimestamp(nowMillis - 15000);
+
+        List<MeterData> dataList = new ArrayList<MeterData>();
+        dataList.add(m1);
+        dataList.add(m2);
+        dataList.add(m3);
+        dataList.add(m4);
+        dataList.add(m5);
+
+        dataList = DefaultMetricsService.filterOldMeterData(dataList, nowMillis, 25000);
+
+        assertFalse(dataList.contains(m3));
+        assertFalse(dataList.contains(m4));
+
+        assertTrue(dataList.contains(m1));
+        assertTrue(dataList.contains(m2));
+        assertTrue(dataList.contains(m5));
+    }
 
     @Test
     public void testObserver() throws Exception {
