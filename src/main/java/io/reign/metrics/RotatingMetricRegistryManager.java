@@ -13,18 +13,6 @@
 
 package io.reign.metrics;
 
-import io.reign.util.TimeUnitUtil;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
@@ -32,6 +20,17 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import io.reign.util.TimeUnitUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -173,7 +172,7 @@ public class RotatingMetricRegistryManager implements MetricRegistryManager {
 
 			// reset metrics
 			Map<String, Metric> metricMap = this.metricRegistry.getMetrics();
-			Set<String> keys = metricMap.keySet();
+			Set<String> keys = new HashSet<String>(metricMap.keySet());
 			for (String key : keys) {
 				String metricName = key;
 				Metric metric = metricMap.get(metricName);
